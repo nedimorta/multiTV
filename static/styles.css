@@ -1,0 +1,52 @@
+body {
+  background-color: #121212;
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+.navbar {
+  background-color: #1f1f1f;
+  padding: 0.25rem 0.5rem; /* Make the navbar thinner */
+}
+.navbar-brand {
+  margin: 0;
+  font-size: 1rem; /* Make the brand text smaller */
+}
+.dropdown-menu {
+  background-color: #1f1f1f;
+}
+.dropdown-menu .dropdown-item {
+  color: #ffffff;
+}
+.dropdown-menu .dropdown-item:hover {
+  background-color: #343a40;
+}
+.iframe-container {
+  display: grid;
+  height: calc(100vh - 42px); /* Subtract the height of the thinner navbar */
+  gap: 5px; /* Consistent gap between boxes */
+  background-color: #121212;
+}
+.iframe-box {
+  background-color: #121212; /* Ensure iframe boxes have the same background color as the body */
+  border: 1px solid #1f1f1f; /* Thin line to separate the boxes */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.iframe-box input {
+  width: 70%; /* Smaller width */
+  text-align: center; /* Center the placeholder text */
+  margin-bottom: 10px;
+}
+.iframe-box button {
+  width: 50%; /* Smaller width for button */
+}
+.iframe-box iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
