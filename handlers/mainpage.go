@@ -3,7 +3,6 @@ package handlers
 import (
 	"html/template"
 	"log"
-	"multi-tv/businesslogic"
 	"net/http"
 	"strconv"
 )
@@ -16,15 +15,10 @@ func HandleMainPage(w http.ResponseWriter, r *http.Request) {
 		channelCount = 9 // Default to 9 channels
 	}
 
-	initialGrid := make([]int, channelCount)
-	for i := 0; i < channelCount; i++ {
-		initialGrid[i] = i + 1
-	}
-
 	data := struct {
 		InitialGrid []int
 	}{
-		InitialGrid: initialGrid,
+		InitialGrid: initializeGrid(channelCount),
 	}
 
 	if err := tmpl.ExecuteTemplate(w, "index.tmpl", data); err != nil {
@@ -39,15 +33,12 @@ func HandleUpdate(w http.ResponseWriter, r *http.Request) {
 		channelCount = 9 // Default to 9 channels
 	}
 
-	initialGrid := make([]int, channelCount)
-	for i := 0; i < channelCount; i++ {
-		initialGrid[i] = i + 1
-	}
+	log.Printf("Updating grid with %d channels", channelCount)
 
 	data := struct {
 		InitialGrid []int
 	}{
-		InitialGrid: initialGrid,
+		InitialGrid: initializeGrid(channelCount),
 	}
 
 	if err := tmpl.ExecuteTemplate(w, "content", data); err != nil {
@@ -56,12 +47,10 @@ func HandleUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func HandleAddChannel(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		name := r.FormValue("name")
-		url := r.FormValue("url")
-		businesslogic.AddChannel(name, url)
+func initializeGrid(channelCount int) []int {
+	grid := make([]int, channelCount)
+	for i := 0; i < channelCount; i++ {
+		grid[i] = i + 1
 	}
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	return grid
 }
