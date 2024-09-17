@@ -34,10 +34,26 @@
 
 ## Usage
 
-1. Use the "Grid Layout" dropdown menu to select the desired grid layout (2x2, 3x3, 3x4, 4x4).
-2. Add YouTube channels by entering the URL in the input field and clicking the "+" button.
-3. Drag and drop channels to rearrange them.
-4. Click the "X" button to reset a channel.
+1. Select a grid layout from the "Grid Layout" dropdown menu.
+2. Enter YouTube video URLs in the input fields and click the "+" button to add videos to the grid.
+3. Drag and drop videos to rearrange them within the grid.
+4. Use the "X" button on each video to remove it from the grid which works as a reset button.
+
+### Saving and Loading Configurations
+
+You can save your current grid layout and video selections, and load them later:
+
+1. To save your current configuration:
+   - Click on the "Save/Load" dropdown in the navigation bar.
+   - Select "Save" from the dropdown menu.
+   - Choose a location on your computer to save the configuration file.
+
+2. To load a previously saved configuration:
+   - Click on the "Save/Load" dropdown in the navigation bar.
+   - Select "Load" from the dropdown menu.
+   - Choose the configuration file you want to load.
+
+The application will then update the grid layout and load the saved videos into their respective positions.
 
 ## Contributing
 

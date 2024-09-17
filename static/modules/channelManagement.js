@@ -28,7 +28,7 @@ function restoreVideoStates() {
         <iframe src="${videoStates[box.id].src}" allowfullscreen></iframe>
         <div class="button-container">
           <button class="drag-button" onmousedown="event.preventDefault()">☰</button>
-          <button class="reset-button" onclick="resetChannel('${box.id}')">X</button>
+          <button class="reset-button">X</button>
         </div>
       `;
       const iframe = box.querySelector('iframe');
@@ -45,23 +45,25 @@ function resetChannel(boxId) {
   box.innerHTML = `
     <div class="input-container">
       <input type="text" id="url${boxId.replace('box', '')}" placeholder="Enter YouTube URL" class="form-control">
-      <button onclick="addChannel('${boxId}', 'url${boxId.replace('box', '')}')" class="btn btn-primary add-button">+</button>
+      <button class="btn btn-primary add-button">+</button>
     </div>
   `;
   delete videoStates[boxId];
   adjustIframeSizes();
 }
 
-function addChannel(boxId, urlId) {
-  const url = document.getElementById(urlId).value;
+function addChannel(boxId, url) {
+  console.log(`Adding channel to box ${boxId} with URL: ${url}`);
   const videoId = extractVideoId(url);
+  console.log(`Extracted video ID: ${videoId}`);
+  
   if (videoId) {
     const box = document.getElementById(boxId);
     box.innerHTML = `
       <iframe src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" allowfullscreen></iframe>
       <div class="button-container">
         <button class="drag-button" onmousedown="event.preventDefault()">☰</button>
-        <button class="reset-button" onclick="resetChannel('${boxId}')">X</button>
+        <button class="reset-button">X</button>
       </div>
     `;
     videoStates[boxId] = {
@@ -69,8 +71,11 @@ function addChannel(boxId, urlId) {
       currentTime: 0
     };
     adjustIframeSizes();
+    console.log(`Channel added successfully to box ${boxId}`);
   } else {
-    alert('Invalid YouTube URL');
+    console.error(`Invalid YouTube URL: ${url}`);
+    // Instead of showing an alert, we'll log the error and not interrupt the user
+    // alert('Invalid YouTube URL');
   }
 }
 
