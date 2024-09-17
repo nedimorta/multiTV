@@ -5,6 +5,7 @@ let videoStates = {};
 
 function storeVideoStates() {
   const iframeBoxes = document.querySelectorAll('.iframe-box');
+  videoStates = {}; // Reset videoStates
   iframeBoxes.forEach(box => {
     const iframe = box.querySelector('iframe');
     if (iframe) {

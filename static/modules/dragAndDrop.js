@@ -1,5 +1,6 @@
 import { addOverlay, removeOverlay } from './overlay.js';
 import { adjustIframeSizes } from './layout.js';
+import { storeVideoStates } from './channelManagement.js';
 
 let draggedElement = null;
 let ghostElement = null;
@@ -11,10 +12,8 @@ function dragStart(event) {
     draggedElement = event.target.closest('.iframe-box');
     draggedElement.classList.add('dragging');
     
-    // Store the original position
     originalPosition = draggedElement.getBoundingClientRect();
     
-    // Create a ghost element for smooth dragging
     ghostElement = draggedElement.cloneNode(true);
     ghostElement.classList.add('ghost-box');
     ghostElement.style.width = `${originalPosition.width}px`;
@@ -23,13 +22,11 @@ function dragStart(event) {
     ghostElement.style.zIndex = '1000';
     document.body.appendChild(ghostElement);
     
-    // Store the initial mouse position relative to the dragged element
     const mouseX = event.clientX - originalPosition.left;
     const mouseY = event.clientY - originalPosition.top;
     ghostElement.dataset.offsetX = mouseX;
     ghostElement.dataset.offsetY = mouseY;
     
-    // Add an overlay to prevent iframe interaction during drag
     addOverlay(draggedElement);
     
     document.addEventListener('mousemove', drag);
@@ -45,7 +42,6 @@ function drag(event) {
     ghostElement.style.left = `${event.clientX - offsetX}px`;
     ghostElement.style.top = `${event.clientY - offsetY}px`;
     
-    // Find the element we're hovering over
     let targetBox = findTargetBox(event.clientX, event.clientY);
     
     document.querySelectorAll('.iframe-box').forEach(box => {
@@ -64,14 +60,9 @@ function dragEnd(event) {
     let targetBox = findTargetBox(ghostRect.left + ghostRect.width / 2, ghostRect.top + ghostRect.height / 2);
     
     if (targetBox && targetBox !== draggedElement) {
-      // Perform the grid rearrangement
-      rearrangeGrid(draggedElement, targetBox);
-    } else {
-      // Return to original position
-      draggedElement.style.transform = 'none';
+      moveBoxToTarget(draggedElement, targetBox);
     }
     
-    // Remove dragging class and overlay from all elements
     document.querySelectorAll('.iframe-box').forEach(box => {
       box.classList.remove('dragging');
       box.classList.remove('drop-target');
@@ -80,7 +71,6 @@ function dragEnd(event) {
 
     document.body.removeChild(ghostElement);
     
-    // Reset variables
     draggedElement = null;
     ghostElement = null;
     originalPosition = null;
@@ -89,28 +79,43 @@ function dragEnd(event) {
     document.removeEventListener('mouseup', dragEnd);
     
     adjustIframeSizes();
+    storeVideoStates();
   }
 }
 
-function rearrangeGrid(draggedElement, targetBox) {
+function moveBoxToTarget(draggedBox, targetBox) {
   const container = document.getElementById('iframeContainer');
-  const boxes = Array.from(container.querySelectorAll('.iframe-box'));
-  const draggedIndex = boxes.indexOf(draggedElement);
-  const targetIndex = boxes.indexOf(targetBox);
   
-  if (draggedIndex < targetIndex) {
-    targetBox.parentNode.insertBefore(draggedElement, targetBox.nextSibling);
+  // Check if the target box is empty
+  if (targetBox.querySelector('.input-container')) {
+    // If target is empty, just swap their contents
+    const draggedContent = draggedBox.innerHTML;
+    draggedBox.innerHTML = targetBox.innerHTML;
+    targetBox.innerHTML = draggedContent;
   } else {
-    targetBox.parentNode.insertBefore(draggedElement, targetBox);
+    // If target is not empty, swap their positions in the DOM
+    const nextDragged = draggedBox.nextElementSibling;
+    const nextTarget = targetBox.nextElementSibling;
+    
+    if (nextDragged === targetBox) {
+      container.insertBefore(targetBox, draggedBox);
+    } else if (nextTarget === draggedBox) {
+      container.insertBefore(draggedBox, targetBox);
+    } else {
+      container.insertBefore(draggedBox, nextTarget);
+      container.insertBefore(targetBox, nextDragged);
+    }
   }
 
   // Trigger a layout recalculation
   container.offsetHeight;
 
   // Add a class to trigger the snap animation
-  draggedElement.classList.add('snapped');
+  draggedBox.classList.add('snapped');
+  targetBox.classList.add('snapped');
   setTimeout(() => {
-    draggedElement.classList.remove('snapped');
+    draggedBox.classList.remove('snapped');
+    targetBox.classList.remove('snapped');
   }, 300);
 }
 
