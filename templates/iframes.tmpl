@@ -1,8 +1,10 @@
 {{define "content"}}
     {{range $i := .InitialGrid}}
         <div class="iframe-box" id="box{{$i}}">
-            <input type="text" id="url{{$i}}" placeholder="Enter YouTube URL" class="form-control">
-            <button onclick="addChannel('box{{$i}}', 'url{{$i}}')" class="btn btn-primary mt-2">Add</button>
+            <div class="input-container">
+                <input type="text" id="url{{$i}}" placeholder="Enter YouTube URL" class="form-control">
+                <button onclick="addChannel('box{{$i}}', 'url{{$i}}')" class="btn btn-primary add-button">+</button>
+            </div>
         </div>
     {{end}}
 {{end}}
