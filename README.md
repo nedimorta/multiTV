@@ -8,21 +8,28 @@
 ### Installation
 
 1. Clone the repository:
-sh
-git clone https://github.com/nedimorta/multiTV.git
-cd multi-tv
+
+`sh`\
+`git clone https://github.com/nedimorta/multiTV.git`\
+`cd multi-tv`\
+
 2. Install Go dependencies:
-sh
-go mod tidy
+
+`sh`\
+`go mod tidy`\
+
 3. Install frontend dependencies:
-sh
-npm install
+
+`sh`\
+`npm install`\
 
 ### Running the Application
 
 1. Start the Go server:
-sh
-go run main.go
+
+`sh`\
+`go run main.go`\
+
 2. Open your web browser and navigate to `http://localhost:8080`.
 
 ## Usage
