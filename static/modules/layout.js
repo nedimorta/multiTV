@@ -18,7 +18,14 @@ function adjustIframeSizes() {
   iframeContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
   iframeContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
+  // Adjust the size of each iframe box
+  iframeBoxes.forEach(box => {
+    box.style.width = '100%';
+    box.style.height = '100%';
+  });
+
   console.log(`Adjusting grid: ${columns} columns, ${rows} rows for ${channelCount} channels`);
 }
 
+// Export the function so it can be used in other modules
 export { adjustIframeSizes };

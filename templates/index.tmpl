@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css">
     <script src="https://unpkg.com/htmx.org@1.7.0/dist/htmx.min.js"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
@@ -22,10 +23,10 @@
                             Grid Layout
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-                            <li><a class="dropdown-item" href="#" hx-get="/update?channelCount=4" hx-target="#iframeContainer" hx-swap="innerHTML">2x2</a></li>
-                            <li><a class="dropdown-item" href="#" hx-get="/update?channelCount=9" hx-target="#iframeContainer" hx-swap="innerHTML">3x3</a></li>
-                            <li><a class="dropdown-item" href="#" hx-get="/update?channelCount=12" hx-target="#iframeContainer" hx-swap="innerHTML">3x4</a></li>
-                            <li><a class="dropdown-item" href="#" hx-get="/update?channelCount=16" hx-target="#iframeContainer" hx-swap="innerHTML">4x4</a></li>
+                            <li><a class="dropdown-item" href="#" hx-get="/update?channelCount=4" hx-target="#iframeContainer" hx-swap="outerHTML" hx-trigger="click" hx-push-url="false">2x2</a></li>
+                            <li><a class="dropdown-item" href="#" hx-get="/update?channelCount=9" hx-target="#iframeContainer" hx-swap="outerHTML" hx-trigger="click" hx-push-url="false">3x3</a></li>
+                            <li><a class="dropdown-item" href="#" hx-get="/update?channelCount=12" hx-target="#iframeContainer" hx-swap="outerHTML" hx-trigger="click" hx-push-url="false">3x4</a></li>
+                            <li><a class="dropdown-item" href="#" hx-get="/update?channelCount=16" hx-target="#iframeContainer" hx-swap="outerHTML" hx-trigger="click" hx-push-url="false">4x4</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -37,5 +38,36 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="/static/scripts.js"></script>
+    <script>
+        document.body.addEventListener('htmx:beforeSwap', function(evt) {
+            if (evt.detail.target.id === 'iframeContainer') {
+                evt.detail.shouldSwap = false;
+                const newContainer = evt.detail.serverResponse;
+                preserveVideoContent(newContainer);
+            }
+        });
+
+        function preserveVideoContent(newContainerHTML) {
+            const oldContainer = document.getElementById('iframeContainer');
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newContainerHTML;
+            const newContainer = tempDiv.firstElementChild;
+
+            const oldBoxes = oldContainer.querySelectorAll('.iframe-box');
+            const newBoxes = newContainer.querySelectorAll('.iframe-box');
+
+            oldBoxes.forEach((oldBox, index) => {
+                if (index < newBoxes.length) {
+                    const iframe = oldBox.querySelector('iframe');
+                    if (iframe) {
+                        newBoxes[index].innerHTML = oldBox.innerHTML;
+                    }
+                }
+            });
+
+            oldContainer.innerHTML = newContainer.innerHTML;
+            adjustIframeSizes(); // Call this function after updating the container
+        }
+    </script>
 </body>
 </html>
