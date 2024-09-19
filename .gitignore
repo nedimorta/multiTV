@@ -1,0 +1,33 @@
+# Ignore executable files
+*.exe
+
+# Ignore Go binary files
+*.o
+*.a
+
+# Ignore Node.js dependencies
+node_modules/
+
+# Ignore logs
+*.log
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE specific files
+.vscode/
+.idea/
+
+# Ignore compiled Go files
+*.test
+
+# Ignore any local configuration files
+config.local.yaml
+
+# Ignore any build output directory
+/build
+/dist
+
+# Ignore any temporary files
+*.tmp
