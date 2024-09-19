@@ -6,6 +6,8 @@ function adjustIframeSizes() {
   let columns, rows;
   if (channelCount <= 4) {
     columns = 2; rows = 2;
+  } else if (channelCount <= 6) {
+    columns = 3; rows = 2;
   } else if (channelCount <= 9) {
     columns = 3; rows = 3;
   } else if (channelCount <= 12) {
