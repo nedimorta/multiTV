@@ -39,6 +39,17 @@ function setupEventListeners() {
       addChannel(box.id, input.value);
     }
   });
+
+  // Add event listener for "Enter" key on input fields
+  iframeContainer.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      const box = event.target.closest('.iframe-box');
+      if (box) {
+        const input = box.querySelector('input');
+        addChannel(box.id, input.value);
+      }
+    }
+  });
 }
 
 export { setupEventListeners };
