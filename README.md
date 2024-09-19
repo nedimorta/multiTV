@@ -1,63 +1,74 @@
+# Multi-TV
+
+Multi-TV is a web application that allows users to watch multiple YouTube videos simultaneously in a customizable grid layout. It provides features such as drag-and-drop video rearrangement, various grid layouts, and the ability to save and load configurations.
+
+## Features
+
+- Watch multiple YouTube videos in a single view
+- Customizable grid layouts (1x2, 2x2, 2x3, 3x3, 4x3, 4x4)
+- Drag-and-drop functionality to rearrange videos
+- Save and load grid configurations
+- Responsive design for various screen sizes
+
 ## Setup Instructions
 
 ### Prerequisites
 
-- Go (Golang) installed on your machine
+- Go (1.16 or later)
 - Node.js and npm (for managing frontend dependencies)
 
 ### Installation
 
 1. Clone the repository:
 
-`sh`\
-`git clone https://github.com/nedimorta/multiTV.git`\
+`git clone https://github.com/yourusername/multi-tv.git`\
 `cd multi-tv`
 
 2. Install Go dependencies:
 
-`sh`\
 `go mod tidy`
 
 3. Install frontend dependencies:
 
-`sh`\
 `npm install`
 
 ### Running the Application
 
 1. Start the Go server:
 
-`sh`\
 `go run main.go`
 
 2. Open your web browser and navigate to `http://localhost:8080`.
 
 ## Usage
 
-1. Select a grid layout from the "Grid Layout" dropdown menu.
+1. Select a grid layout from the "Grid View" dropdown menu in the navigation bar.
 2. Enter YouTube video URLs in the input fields and click the "+" button to add videos to the grid.
-3. Drag and drop videos to rearrange them within the grid.
-4. Use the "X" button on each video to remove it from the grid which works as a reset button.
+3. Drag and drop videos using the "☰" button to rearrange them within the grid.
+4. Use the "X" button on each video to remove it from the grid.
 
 ### Saving and Loading Configurations
 
-You can save your current grid layout and video selections, and load them later:
+- To save your current configuration:
+  1. Click on the "Save" button in the navigation bar.
+  2. Choose a location on your computer to save the configuration file.
 
-1. To save your current configuration:
-   - Click on the "Save/Load" dropdown in the navigation bar.
-   - Select "Save" from the dropdown menu.
-   - Choose a location on your computer to save the configuration file.
+- To load a previously saved configuration:
+  1. Click on the "Load" button in the navigation bar.
+  2. Select the configuration file you want to load.
 
-2. To load a previously saved configuration:
-   - Click on the "Save/Load" dropdown in the navigation bar.
-   - Select "Load" from the dropdown menu.
-   - Choose the configuration file you want to load.
+## Project Structure
 
-The application will then update the grid layout and load the saved videos into their respective positions.
+- `main.go`: Entry point of the application
+- `handlers/`: HTTP request handlers
+- `views/`: HTML templates and components
+- `static/`: CSS, JavaScript, and other static assets
+- `businesslogic/`: Business logic layer
+- `dataaccess/`: Data access layer (currently not in use)
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
@@ -66,3 +77,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Acknowledgements
 
 - [YouTube IFrame Player API](https://developers.google.com/youtube/iframe_api_reference)
+- [Bootstrap](https://getbootstrap.com/)
+- [templ](https://github.com/a-h/templ)
