@@ -7,13 +7,16 @@ let ghostElement = null;
 let originalPosition = null;
 
 function dragStart(event) {
+  // Only start dragging if we're grabbing the handle.
   if (event.target.classList.contains('drag-button') || event.target.closest('.drag-button')) {
     event.preventDefault();
     draggedElement = event.target.closest('.iframe-box');
     draggedElement.classList.add('dragging');
     
+    // Remember where we started. It's like leaving a trail of breadcrumbs.
     originalPosition = draggedElement.getBoundingClientRect();
     
+    // Create a ghost element. It's like your video's spirit animal.
     ghostElement = draggedElement.cloneNode(true);
     ghostElement.classList.add('ghost-box');
     ghostElement.style.width = `${originalPosition.width}px`;
@@ -22,6 +25,7 @@ function dragStart(event) {
     ghostElement.style.zIndex = '1000';
     document.body.appendChild(ghostElement);
     
+    // Calculate where the mouse grabbed the element.
     const mouseX = event.clientX - originalPosition.left;
     const mouseY = event.clientY - originalPosition.top;
     ghostElement.dataset.offsetX = mouseX;
@@ -41,9 +45,10 @@ function drag(event) {
     
     ghostElement.style.left = `${event.clientX - offsetX}px`;
     ghostElement.style.top = `${event.clientY - offsetY}px`;
-    
+
     let targetBox = findTargetBox(event.clientX, event.clientY);
     
+    // Highlight potential drop zones.
     document.querySelectorAll('.iframe-box').forEach(box => {
       if (box === targetBox && box !== draggedElement) {
         box.classList.add('drop-target');
@@ -56,28 +61,33 @@ function drag(event) {
 
 function dragEnd(event) {
   if (draggedElement && ghostElement) {
+    // Hopefully not in the void.
     const ghostRect = ghostElement.getBoundingClientRect();
     let targetBox = findTargetBox(ghostRect.left + ghostRect.width / 2, ghostRect.top + ghostRect.height / 2);
     
     if (targetBox && targetBox !== draggedElement) {
+      // Swap 'em if you got 'em
       moveBoxToTarget(draggedElement, targetBox);
     }
     
+    // Mom would be proud.
     document.querySelectorAll('.iframe-box').forEach(box => {
       box.classList.remove('dragging');
       box.classList.remove('drop-target');
       removeOverlay(box);
     });
 
+    // Say goodbye to our ghost friend.
     document.body.removeChild(ghostElement);
     
+    // It's like it never even happened.
     draggedElement = null;
     ghostElement = null;
     originalPosition = null;
     
     document.removeEventListener('mousemove', drag);
     document.removeEventListener('mouseup', dragEnd);
-    
+
     adjustIframeSizes();
     storeVideoStates();
   }
@@ -86,14 +96,13 @@ function dragEnd(event) {
 function moveBoxToTarget(draggedBox, targetBox) {
   const container = document.getElementById('iframeContainer');
   
-  // Check if the target box is empty
   if (targetBox.querySelector('.input-container')) {
-    // If target is empty, just swap their contents
+    // If it's empty, just swap the contents, easy peasy.
     const draggedContent = draggedBox.innerHTML;
     draggedBox.innerHTML = targetBox.innerHTML;
     targetBox.innerHTML = draggedContent;
   } else {
-    // If target is not empty, swap their positions in the DOM
+    // If it's not empty, we need to do some DOM gymnastics
     const nextDragged = draggedBox.nextElementSibling;
     const nextTarget = targetBox.nextElementSibling;
     
@@ -107,6 +116,7 @@ function moveBoxToTarget(draggedBox, targetBox) {
     }
   }
 
+  // It's like giving the browser a tiny heart attack.
   container.offsetHeight;
 
   draggedBox.classList.add('snapped');

@@ -1,14 +1,16 @@
 import { adjustIframeSizes } from './layout.js';
 import { extractVideoId } from './utils.js';
 
+// This is where we keep track of video states.
 let videoStates = {};
 
 function storeVideoStates() {
   const iframeBoxes = document.querySelectorAll('.iframe-box');
-  videoStates = {}; // Reset videoStates
+  videoStates = {}; // Clear out the old stuff
   iframeBoxes.forEach(box => {
     const iframe = box.querySelector('iframe');
     if (iframe) {
+      // YouTube API magic happening here
       const player = new YT.Player(iframe);
       player.getCurrentTime().then(currentTime => {
         videoStates[box.id] = {
@@ -24,6 +26,7 @@ function restoreVideoStates() {
   const iframeBoxes = document.querySelectorAll('.iframe-box');
   iframeBoxes.forEach(box => {
     if (videoStates[box.id]) {
+      // Rebuild the box with the saved video
       box.innerHTML = `
         <iframe src="${videoStates[box.id].src}" allowfullscreen></iframe>
         <div class="button-container">
@@ -33,6 +36,7 @@ function restoreVideoStates() {
       `;
       const iframe = box.querySelector('iframe');
       iframe.onload = () => {
+        // Jump to where we left off
         const player = new YT.Player(iframe);
         player.seekTo(videoStates[box.id].currentTime, true);
       };
@@ -41,6 +45,7 @@ function restoreVideoStates() {
 }
 
 function resetChannel(boxId) {
+  // Back to square one for this box
   const box = document.getElementById(boxId);
   box.innerHTML = `
     <div class="input-container">
@@ -53,9 +58,9 @@ function resetChannel(boxId) {
 }
 
 function addChannel(boxId, url) {
-  console.log(`Adding channel to box ${boxId} with URL: ${url}`);
+  console.log(`Trying to add a video to ${boxId}. Let's see if this URL works: ${url}`);
   const videoId = extractVideoId(url);
-  console.log(`Extracted video ID: ${videoId}`);
+  console.log(`Alright, we got a video ID: ${videoId}`);
   
   if (videoId) {
     const box = document.getElementById(boxId);
@@ -71,11 +76,10 @@ function addChannel(boxId, url) {
       currentTime: 0
     };
     adjustIframeSizes();
-    console.log(`Channel added successfully to box ${boxId}`);
+    console.log(`Boom! Video added to ${boxId}. Looking good!`);
   } else {
-    console.error(`Invalid YouTube URL: ${url}`);
-    // Instead of showing an alert, log the error and not interrupt the user
-    // alert('Invalid YouTube URL');
+    console.error(`Uh oh, that URL didn't work out: ${url}`);
+    // We could show an alert, but let's not annoy the user.
   }
 }
 
