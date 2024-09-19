@@ -107,10 +107,8 @@ function moveBoxToTarget(draggedBox, targetBox) {
     }
   }
 
-  // Trigger a layout recalculation
   container.offsetHeight;
 
-  // Add a class to trigger the snap animation
   draggedBox.classList.add('snapped');
   targetBox.classList.add('snapped');
   setTimeout(() => {

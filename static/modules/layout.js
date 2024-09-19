@@ -18,11 +18,9 @@ function adjustIframeSizes() {
     columns = 4; rows = 4;
   }
 
-  // Set the grid layout
   iframeContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
   iframeContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
-  // Adjust the size of each iframe box
   iframeBoxes.forEach(box => {
     box.style.width = '100%';
     box.style.height = '100%';
@@ -45,7 +43,6 @@ function setGridView(columns, rows) {
   const totalBoxes = columns * rows;
   const currentBoxes = iframeContainer.querySelectorAll('.iframe-box').length;
 
-  // Add or remove boxes to match the selected grid view
   if (totalBoxes > currentBoxes) {
     for (let i = currentBoxes; i < totalBoxes; i++) {
       const box = document.createElement('div');
@@ -68,18 +65,14 @@ function setGridView(columns, rows) {
     }
   }
 
-  // Set the grid layout
   iframeContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
   iframeContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
-  // Remove any fixed aspect ratio
   iframeContainer.style.aspectRatio = 'auto';
 
-  // Adjust iframe sizes after setting the grid
   adjustIframeSizes();
 
   console.log(`Grid view set to: ${columns} columns, ${rows} rows`);
 }
 
-// Export the functions so they can be used in other modules
 export { adjustIframeSizes, setGridView };

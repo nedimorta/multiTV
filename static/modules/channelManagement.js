@@ -74,7 +74,7 @@ function addChannel(boxId, url) {
     console.log(`Channel added successfully to box ${boxId}`);
   } else {
     console.error(`Invalid YouTube URL: ${url}`);
-    // Instead of showing an alert, we'll log the error and not interrupt the user
+    // Instead of showing an alert, log the error and not interrupt the user
     // alert('Invalid YouTube URL');
   }
 }

@@ -110,7 +110,6 @@ function applyConfiguration(config) {
         columns = 4; rows = 4;
     }
 
-    // Set the grid view
     setGridView(columns, rows);
 
     // Wait for the grid to update before adding videos

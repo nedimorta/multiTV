@@ -3,10 +3,8 @@ import { addChannel, resetChannel } from './modules/channelManagement.js';
 import { adjustIframeSizes, setGridView } from './modules/layout.js';
 import { saveConfiguration, loadConfiguration } from './modules/saveAndLoad.js';
 
-// Initialize event listeners
 setupEventListeners();
 
-// Make functions globally accessible
 window.addChannel = addChannel;
 window.resetChannel = resetChannel;
 window.adjustIframeSizes = adjustIframeSizes;
@@ -20,7 +18,6 @@ window.loadConfiguration = (event) => {
   loadConfiguration(event);
 };
 
-// Call adjustIframeSizes on page load
 document.addEventListener('DOMContentLoaded', () => {
   adjustIframeSizes();
 });
