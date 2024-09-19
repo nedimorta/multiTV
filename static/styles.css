@@ -25,7 +25,7 @@ body {
 .iframe-container {
   flex: 1;
   display: grid;
-  gap: 0.5vh;
+  gap: 0.25vh; /* Reduced gap between boxes */
   padding: 0.5vh;
   overflow: hidden;
   width: 100%;
