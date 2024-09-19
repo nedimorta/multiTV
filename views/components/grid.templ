@@ -1,0 +1,16 @@
+package components
+
+import "strconv"
+
+templ Grid(initialGrid []int) {
+	<div id="iframeContainer" class="iframe-container">
+		for _, i := range initialGrid {
+			<div id={ "box" + strconv.Itoa(i) } class="iframe-box">
+				<div class="input-container">
+					<input type="text" id={ "url" + strconv.Itoa(i) } placeholder="Enter YouTube URL" class="form-control"/>
+					<button class="btn btn-primary add-button">+</button>
+				</div>
+			</div>
+		}
+	</div>
+}

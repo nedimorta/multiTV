@@ -1,6 +1,6 @@
 import { setupEventListeners } from './modules/eventListeners.js';
 import { addChannel, resetChannel } from './modules/channelManagement.js';
-import { adjustIframeSizes } from './modules/layout.js';
+import { adjustIframeSizes, setGridView } from './modules/layout.js';
 import { saveConfiguration, loadConfiguration } from './modules/saveAndLoad.js';
 
 // Initialize event listeners
@@ -10,8 +10,15 @@ setupEventListeners();
 window.addChannel = addChannel;
 window.resetChannel = resetChannel;
 window.adjustIframeSizes = adjustIframeSizes;
-window.saveConfiguration = (event) => saveConfiguration(event);
-window.loadConfiguration = (event) => loadConfiguration(event);
+window.setGridView = setGridView;
+window.saveConfiguration = (event) => {
+  event.preventDefault();
+  saveConfiguration(event);
+};
+window.loadConfiguration = (event) => {
+  event.preventDefault();
+  loadConfiguration(event);
+};
 
 // Call adjustIframeSizes on page load
 document.addEventListener('DOMContentLoaded', () => {

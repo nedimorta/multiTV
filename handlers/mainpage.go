@@ -1,14 +1,11 @@
 package handlers
 
 import (
-	"bytes"
-	"html/template"
-	"log"
+	"multi-tv/views"
+	"multi-tv/views/components"
 	"net/http"
 	"strconv"
 )
-
-var tmpl = template.Must(template.New("main").ParseFiles("templates/index.tmpl", "templates/iframes.tmpl", "templates/grid_structure.tmpl"))
 
 func HandleMainPage(w http.ResponseWriter, r *http.Request) {
 	channelCount, err := strconv.Atoi(r.URL.Query().Get("channelCount"))
@@ -16,16 +13,10 @@ func HandleMainPage(w http.ResponseWriter, r *http.Request) {
 		channelCount = 9 // Default to 9 channels
 	}
 
-	data := struct {
-		InitialGrid []int
-	}{
-		InitialGrid: initializeGrid(channelCount),
-	}
+	data := initializeGrid(channelCount)
 
-	if err := tmpl.ExecuteTemplate(w, "index.tmpl", data); err != nil {
-		log.Printf("Error executing template: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
+	component := views.Index(data)
+	component.Render(r.Context(), w)
 }
 
 func HandleUpdate(w http.ResponseWriter, r *http.Request) {
@@ -34,23 +25,10 @@ func HandleUpdate(w http.ResponseWriter, r *http.Request) {
 		channelCount = 9 // Default to 9 channels
 	}
 
-	log.Printf("Updating grid with %d channels", channelCount)
+	data := initializeGrid(channelCount)
 
-	data := struct {
-		InitialGrid []int
-	}{
-		InitialGrid: initializeGrid(channelCount),
-	}
-
-	var buf bytes.Buffer
-	if err := tmpl.ExecuteTemplate(&buf, "grid_structure", data); err != nil {
-		log.Printf("Error executing template: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "text/html")
-	w.Write(buf.Bytes())
+	component := components.Grid(data)
+	component.Render(r.Context(), w)
 }
 
 func initializeGrid(channelCount int) []int {
