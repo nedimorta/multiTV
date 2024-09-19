@@ -4,7 +4,9 @@ function adjustIframeSizes() {
   const channelCount = iframeBoxes.length;
 
   let columns, rows;
-  if (channelCount <= 4) {
+  if (channelCount <= 2) {
+    columns = 1; rows = 2;
+  } else if (channelCount <= 4) {
     columns = 2; rows = 2;
   } else if (channelCount <= 6) {
     columns = 3; rows = 2;
@@ -24,6 +26,15 @@ function adjustIframeSizes() {
   iframeBoxes.forEach(box => {
     box.style.width = '100%';
     box.style.height = '100%';
+    
+    const iframe = box.querySelector('iframe');
+    if (iframe) {
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.position = 'absolute';
+      iframe.style.top = '0';
+      iframe.style.left = '0';
+    }
   });
 
   console.log(`Adjusting grid: ${columns} columns, ${rows} rows for ${channelCount} channels`);
@@ -60,6 +71,12 @@ function setGridView(columns, rows) {
   // Set the grid layout
   iframeContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
   iframeContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+  // Remove any fixed aspect ratio
+  iframeContainer.style.aspectRatio = 'auto';
+
+  // Adjust iframe sizes after setting the grid
+  adjustIframeSizes();
 
   console.log(`Grid view set to: ${columns} columns, ${rows} rows`);
 }

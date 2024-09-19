@@ -7,6 +7,8 @@ function saveConfiguration(event) {
     const iframeBoxes = iframeContainer.querySelectorAll('.iframe-box');
     const config = {
         gridSize: iframeBoxes.length,
+        columns: iframeContainer.style.gridTemplateColumns.split(' ').length,
+        rows: iframeContainer.style.gridTemplateRows.split(' ').length,
         videos: []
     };
 
@@ -93,10 +95,13 @@ function isValidConfig(config) {
 function applyConfiguration(config) {
     console.log('Applying configuration:', config);
 
-    // Determine the grid dimensions based on the grid size
     let columns, rows;
-    if (config.gridSize <= 4) {
+    if (config.gridSize <= 2) {
+        columns = 1; rows = 2;
+    } else if (config.gridSize <= 4) {
         columns = 2; rows = 2;
+    } else if (config.gridSize <= 6) {
+        columns = 3; rows = 2;
     } else if (config.gridSize <= 9) {
         columns = 3; rows = 3;
     } else if (config.gridSize <= 12) {
