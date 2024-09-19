@@ -1,4 +1,4 @@
-import { adjustIframeSizes } from './layout.js';
+import { adjustIframeSizes, setGridView } from './layout.js';
 import { extractVideoId } from './utils.js';
 
 function saveConfiguration(event) {
@@ -93,11 +93,20 @@ function isValidConfig(config) {
 function applyConfiguration(config) {
     console.log('Applying configuration:', config);
 
-    // Update grid size
-    const updateEvent = new CustomEvent('htmx:trigger', {
-        detail: { target: '#iframeContainer', url: `/update?channelCount=${config.gridSize}` }
-    });
-    document.body.dispatchEvent(updateEvent);
+    // Determine the grid dimensions based on the grid size
+    let columns, rows;
+    if (config.gridSize <= 4) {
+        columns = 2; rows = 2;
+    } else if (config.gridSize <= 9) {
+        columns = 3; rows = 3;
+    } else if (config.gridSize <= 12) {
+        columns = 4; rows = 3;
+    } else {
+        columns = 4; rows = 4;
+    }
+
+    // Set the grid view
+    setGridView(columns, rows);
 
     // Wait for the grid to update before adding videos
     setTimeout(() => {
