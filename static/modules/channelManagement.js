@@ -78,8 +78,7 @@ function addChannel(boxId, url) {
     adjustIframeSizes();
     console.log(`Boom! Video added to ${boxId}. Looking good!`);
   } else {
-    console.error(`Uh oh, that URL didn't work out: ${url}`);
-    // We could show an alert, but let's not annoy the user.
+    alert(`Uh oh, that URL didn't work out: ${url}`);
   }
 }
 

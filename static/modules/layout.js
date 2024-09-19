@@ -103,7 +103,7 @@ function setGridView(columns, rows) {
   // Make sure everything fits nicely
   adjustIframeSizes();
 
-  console.log(`Grid view set to ${columns}x${rows}. Looking sharp!`);
+  console.log(`Grid view set to ${columns}x${rows}.`);
 }
 
 export { adjustIframeSizes, setGridView };
