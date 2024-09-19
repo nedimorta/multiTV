@@ -62,8 +62,10 @@ function addChannel(boxId, url) {
   const videoId = extractVideoId(url);
   console.log(`Alright, we got a video ID: ${videoId}`);
   
+  const box = document.getElementById(boxId);
+  const input = box.querySelector('input');
+
   if (videoId) {
-    const box = document.getElementById(boxId);
     box.innerHTML = `
       <iframe src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" allowfullscreen></iframe>
       <div class="button-container">
@@ -78,7 +80,8 @@ function addChannel(boxId, url) {
     adjustIframeSizes();
     console.log(`Boom! Video added to ${boxId}. Looking good!`);
   } else {
-    alert(`Uh oh, that URL didn't work out: ${url}`);
+    input.style.color = 'red';
+    alert(`Uh oh, that URL didn't work out:\n${url}`);
   }
 }
 
