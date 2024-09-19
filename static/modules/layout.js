@@ -37,13 +37,22 @@ function adjustIframeSizes() {
     }
   });
 
-  console.log(`Grid adjusted: ${columns}x${rows} for ${channelCount} channels. It's like Tetris, but with videos!`);
+  console.log(`Grid adjusted: ${columns}x${rows} for ${channelCount} channels.`);
 }
 
 function setGridView(columns, rows) {
   const iframeContainer = document.getElementById('iframeContainer');
   const totalBoxes = columns * rows;
   const currentBoxes = iframeContainer.querySelectorAll('.iframe-box').length;
+
+  // Collect current videos and their indexes
+  const videos = [];
+  iframeContainer.querySelectorAll('.iframe-box').forEach((box, index) => {
+    const iframe = box.querySelector('iframe');
+    if (iframe) {
+      videos.push({ index, src: iframe.src });
+    }
+  });
 
   if (totalBoxes > currentBoxes) {
     for (let i = currentBoxes; i < totalBoxes; i++) {
@@ -59,7 +68,6 @@ function setGridView(columns, rows) {
       iframeContainer.appendChild(box);
     }
   } else if (totalBoxes < currentBoxes) {
-    // Too many boxes. Time to Marie Kondo this grid.
     for (let i = currentBoxes; i > totalBoxes; i--) {
       const box = document.getElementById(`box${i}`);
       if (box) {
@@ -71,6 +79,26 @@ function setGridView(columns, rows) {
   // Sets up the grid layout.
   iframeContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
   iframeContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+  // Reassign videos to the smallest available indexes
+  iframeContainer.querySelectorAll('.iframe-box').forEach((box, index) => {
+    if (index < videos.length) {
+      box.innerHTML = `
+        <iframe src="${videos[index].src}" allowfullscreen></iframe>
+        <div class="button-container">
+          <button class="drag-button" onmousedown="event.preventDefault()">☰</button>
+          <button class="reset-button">X</button>
+        </div>
+      `;
+    } else {
+      box.innerHTML = `
+        <div class="input-container">
+          <input type="text" id="url${index + 1}" placeholder="Enter YouTube URL" class="form-control"/>
+          <button class="btn btn-primary add-button">+</button>
+        </div>
+      `;
+    }
+  });
 
   // Make sure everything fits nicely
   adjustIframeSizes();
