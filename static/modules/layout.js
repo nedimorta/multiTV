@@ -18,11 +18,11 @@ function adjustIframeSizes() {
     columns = 4; rows = 4;
   }
 
-  // Set the grid layout
+  // Set up our grid.
   iframeContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
   iframeContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
-  // Adjust the size of each iframe box
+  // Make sure each box and iframe fills its space.
   iframeBoxes.forEach(box => {
     box.style.width = '100%';
     box.style.height = '100%';
@@ -37,7 +37,7 @@ function adjustIframeSizes() {
     }
   });
 
-  console.log(`Adjusting grid: ${columns} columns, ${rows} rows for ${channelCount} channels`);
+  console.log(`Grid adjusted: ${columns}x${rows} for ${channelCount} channels. It's like Tetris, but with videos!`);
 }
 
 function setGridView(columns, rows) {
@@ -45,7 +45,6 @@ function setGridView(columns, rows) {
   const totalBoxes = columns * rows;
   const currentBoxes = iframeContainer.querySelectorAll('.iframe-box').length;
 
-  // Add or remove boxes to match the selected grid view
   if (totalBoxes > currentBoxes) {
     for (let i = currentBoxes; i < totalBoxes; i++) {
       const box = document.createElement('div');
@@ -60,6 +59,7 @@ function setGridView(columns, rows) {
       iframeContainer.appendChild(box);
     }
   } else if (totalBoxes < currentBoxes) {
+    // Too many boxes. Time to Marie Kondo this grid.
     for (let i = currentBoxes; i > totalBoxes; i--) {
       const box = document.getElementById(`box${i}`);
       if (box) {
@@ -68,18 +68,14 @@ function setGridView(columns, rows) {
     }
   }
 
-  // Set the grid layout
+  // Sets up the grid layout.
   iframeContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
   iframeContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
-  // Remove any fixed aspect ratio
-  iframeContainer.style.aspectRatio = 'auto';
-
-  // Adjust iframe sizes after setting the grid
+  // Make sure everything fits nicely
   adjustIframeSizes();
 
-  console.log(`Grid view set to: ${columns} columns, ${rows} rows`);
+  console.log(`Grid view set to ${columns}x${rows}. Looking sharp!`);
 }
 
-// Export the functions so they can be used in other modules
 export { adjustIframeSizes, setGridView };

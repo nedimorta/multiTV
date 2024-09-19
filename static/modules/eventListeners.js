@@ -29,7 +29,6 @@ function setupEventListeners() {
   const iframeContainer = document.getElementById('iframeContainer');
   iframeContainer.addEventListener('mousedown', dragStart);
 
-  // Add event delegation for reset and add buttons
   iframeContainer.addEventListener('click', (event) => {
     if (event.target.classList.contains('reset-button')) {
       const boxId = event.target.closest('.iframe-box').id;

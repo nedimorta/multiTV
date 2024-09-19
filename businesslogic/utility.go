@@ -1,6 +1,5 @@
 package businesslogic
 
-// DetermineRowClassCSS selects the CSS class based on the channel count.
 func DetermineRowClassCSS(channelCount int) string {
 	switch {
 	case channelCount <= 4:

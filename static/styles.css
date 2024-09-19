@@ -80,14 +80,6 @@ body {
   justify-content: center;
 }
 
-/* Remove or comment out the following rule as it's no longer needed */
-/* .iframe-box button {
-  width: 100%;
-  font-size: 0.8em;
-  padding: 2px 5px;
-  height: 24px;
-} */
-
 .iframe-box iframe {
   position: absolute;
   top: 0;
@@ -145,31 +137,27 @@ body {
   background-color: rgba(128, 128, 128, 0.9);
 }
 
-/* Add this new style for the dragging effect */
 .iframe-box.dragging {
   opacity: 0.6;
   transform: scale(0.95);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Update styles for the ghost element */
 .ghost-box {
   position: fixed;
   pointer-events: none;
   z-index: 1000;
   opacity: 0.8;
-  box-shadow: 0 0 15px rgba(100, 149, 237, 0.5); /* Blueish shadow */
-  background-color: rgba(100, 149, 237, 0.1); /* Very light blue background */
+  box-shadow: 0 0 15px rgba(100, 149, 237, 0.5);
+  background-color: rgba(100, 149, 237, 0.1);
   transition: none;
-  transform: scale(0.98); /* Slightly smaller than original */
+  transform: scale(0.9); /* Slightly smaller than original */
 }
 
-/* Ensure the iframe maintains its size during drag */
 .ghost-box iframe {
   opacity: 0.6;
 }
 
-/* Add a subtle animation for grid items */
 @keyframes gridItemEnter {
   from { transform: scale(0.95); opacity: 0.5; }
   to { transform: scale(1); opacity: 1; }
@@ -179,7 +167,6 @@ body {
   animation: gridItemEnter 0.3s ease;
 }
 
-/* Add a new animation for snapping effect */
 @keyframes snapAnimation {
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
@@ -190,7 +177,6 @@ body {
   animation: snapAnimation 0.3s ease-out;
 }
 
-/* Style the overlay */
 .drag-overlay {
   background-color: rgba(0, 0, 0, 0.1);
   cursor: move;
@@ -201,8 +187,8 @@ body {
 }
 
 .iframe-box.drop-target {
-  box-shadow: 0 0 0 2px rgba(100, 149, 237, 0.5), /* Cornflower blue with 50% opacity */
-              0 0 10px rgba(100, 149, 237, 0.3); /* Subtle outer glow */
-  transform: scale(1.01); /* Slightly increase size */
+  box-shadow: 0 0 0 2px rgba(100, 149, 237, 0.5),
+              0 0 10px rgba(100, 149, 237, 0.3);
+  transform: scale(1.1);
   transition: all 0.2s ease;
 }
