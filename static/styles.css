@@ -25,7 +25,7 @@ body {
 .iframe-container {
   flex: 1;
   display: grid;
-  gap: 0.5vh;
+  gap: 0.25vh; /* Reduced gap between boxes */
   padding: 0.5vh;
   overflow: hidden;
   width: 100%;
@@ -191,4 +191,32 @@ body {
               0 0 10px rgba(100, 149, 237, 0.3);
   transform: scale(1.1);
   transition: all 0.2s ease;
+}
+
+.input-container input.invalid {
+  color: red;
+}
+
+.custom-alert {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.custom-alert-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.custom-alert-content p {
+  margin: 0 0 20px;
 }

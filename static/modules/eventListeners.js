@@ -1,6 +1,6 @@
 import { storeVideoStates, restoreVideoStates, resetChannel, addChannel } from './channelManagement.js';
 import { adjustIframeSizes } from './layout.js';
-import { debounce } from './utils.js';
+import { debounce, extractVideoId } from './utils.js';
 import { dragStart } from './dragAndDrop.js';
 
 const debouncedAdjustIframeSizes = debounce(adjustIframeSizes, 250);
@@ -37,6 +37,30 @@ function setupEventListeners() {
       const box = event.target.closest('.iframe-box');
       const input = box.querySelector('input');
       addChannel(box.id, input.value);
+    }
+  });
+
+  // Add event listener for "Enter" key on input fields
+  iframeContainer.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      const box = event.target.closest('.iframe-box');
+      if (box) {
+        const input = box.querySelector('input');
+        addChannel(box.id, input.value);
+      }
+    }
+  });
+
+  // Validate URL and change text color accordingly
+  iframeContainer.addEventListener('input', (event) => {
+    if (event.target.tagName === 'INPUT') {
+      const input = event.target;
+      const videoId = extractVideoId(input.value);
+      if (videoId) {
+        input.style.color = '';
+      } else {
+        input.style.color = 'red';
+      }
     }
   });
 }
