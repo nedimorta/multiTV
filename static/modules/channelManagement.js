@@ -1,5 +1,5 @@
 import { adjustIframeSizes } from './layout.js';
-import { extractVideoId } from './utils.js';
+import { extractVideoId, getVideoType } from './utils.js';
 
 // This is where we keep track of video states.
 let videoStates = {};
@@ -49,7 +49,7 @@ function resetChannel(boxId) {
   const box = document.getElementById(boxId);
   box.innerHTML = `
     <div class="input-container">
-      <input type="text" id="url${boxId.replace('box', '')}" placeholder="Enter YouTube URL" class="form-control">
+      <input type="text" id="url${boxId.replace('box', '')}" placeholder="Enter video URL" class="form-control">
       <button class="btn btn-primary add-button">+</button>
     </div>
   `;
@@ -60,22 +60,43 @@ function resetChannel(boxId) {
 function addChannel(boxId, url) {
   console.log(`Trying to add a video to ${boxId}. Let's see if this URL works: ${url}`);
   const videoId = extractVideoId(url);
-  console.log(`Alright, we got a video ID: ${videoId}`);
+  const videoType = getVideoType(url);
+  console.log(`Alright, we got a video ID: ${videoId} and type: ${videoType}`);
   
   const box = document.getElementById(boxId);
   const input = box.querySelector('input');
 
-  if (videoId) {
+  if (videoId && videoType) {
+    let embedHtml;
+    switch (videoType) {
+      case 'youtube':
+        embedHtml = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" allowfullscreen></iframe>`;
+        break;
+      case 'twitch-video':
+        embedHtml = `<iframe src="https://player.twitch.tv/?video=${videoId}&parent=${window.location.hostname}&autoplay=true" allowfullscreen></iframe>`;
+        break;
+      case 'twitch-stream':
+        embedHtml = `<iframe src="https://player.twitch.tv/?channel=${videoId}&parent=${window.location.hostname}&autoplay=true" allowfullscreen></iframe>`;
+        break;
+      case 'kick-video':
+      case 'kick-stream':
+        embedHtml = `<iframe src="https://player.kick.com/${videoId}" allowfullscreen></iframe>`;
+        break;
+    }
+
     box.innerHTML = `
-      <iframe src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" allowfullscreen></iframe>
+      <div class="video-container ${videoType}">
+        ${embedHtml}
+      </div>
       <div class="button-container">
         <button class="drag-button" onmousedown="event.preventDefault()">☰</button>
         <button class="reset-button">X</button>
       </div>
     `;
     videoStates[boxId] = {
-      src: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1`,
-      currentTime: 0
+      src: videoId,
+      currentTime: 0,
+      type: videoType
     };
     adjustIframeSizes();
     console.log(`Boom! Video added to ${boxId}. Looking good!`);
