@@ -14,9 +14,12 @@ function saveConfiguration(event) {
 
     iframeBoxes.forEach((box, index) => {
         const iframe = box.querySelector('iframe');
+        const videoContainer = box.querySelector('.video-container');
         if (iframe && iframe.src) {
+            console.log(`Processing box ${index}, iframe src: ${iframe.src}`);
             const videoId = extractVideoId(iframe.src);
-            const videoType = getVideoType(iframe.src);
+            const videoType = videoContainer ? videoContainer.classList[1] : getVideoType(iframe.src);
+            console.log(`Extracted videoId: ${videoId}, videoType: ${videoType}`);
             if (videoId && videoType) {
                 config.videos.push({
                     index: index,
@@ -26,6 +29,8 @@ function saveConfiguration(event) {
             } else {
                 console.warn(`Could not extract video ID or type for box ${index}`);
             }
+        } else {
+            console.log(`Box ${index} does not contain an iframe or has no src`);
         }
     });
 

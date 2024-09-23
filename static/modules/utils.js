@@ -8,9 +8,12 @@ function extractVideoId(url) {
     // Twitch
     /(?:https?:\/\/)?(?:www\.)?twitch\.tv\/videos\/(\d+)/,
     /(?:https?:\/\/)?(?:www\.)?twitch\.tv\/([a-zA-Z0-9_]+)/,
+    /(?:https?:\/\/)?player\.twitch\.tv\/\?video=v?(\d+)/,
+    /(?:https?:\/\/)?player\.twitch\.tv\/\?channel=([a-zA-Z0-9_]+)/,
     // Kick
     /(?:https?:\/\/)?(?:www\.)?kick\.com\/video\/([a-zA-Z0-9-]+)/,
-    /(?:https?:\/\/)?(?:www\.)?kick\.com\/([a-zA-Z0-9_]+)/
+    /(?:https?:\/\/)?(?:www\.)?kick\.com\/([a-zA-Z0-9_]+)/,
+    /(?:https?:\/\/)?player\.kick\.com\/([a-zA-Z0-9_]+)/
   ];
   
   for (let regex of regexes) {
@@ -19,6 +22,18 @@ function extractVideoId(url) {
       console.log(`Video ID extracted: ${match[1]}`);
       return match[1];
     }
+  }
+  
+  // If no match found, try to extract from query parameters
+  try {
+    const urlObj = new URL(url);
+    const videoId = urlObj.searchParams.get('v');
+    if (videoId) {
+      console.log(`Video ID extracted from query parameter: ${videoId}`);
+      return videoId;
+    }
+  } catch (error) {
+    console.warn('Failed to parse URL:', error);
   }
   
   console.warn(`Failed to extract video ID from URL: ${url}`);
