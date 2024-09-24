@@ -26,6 +26,11 @@ function adjustIframeSizes() {
   iframeBoxes.forEach(box => {
     box.style.width = '100%';
     box.style.height = '100%';
+    const iframe = box.querySelector('iframe');
+    if (iframe) {
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+    }
   });
 
   console.log(`Grid adjusted: ${columns}x${rows} for ${channelCount} channels.`);

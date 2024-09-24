@@ -12,7 +12,8 @@ function extractVideoId(url) {
     /(?:https?:\/\/)?player\.twitch\.tv\/\?channel=([a-zA-Z0-9_]+)/,
     // Kick
     /(?:https?:\/\/)?(?:www\.)?kick\.com\/video\/([a-zA-Z0-9-]+)/,
-    /(?:https?:\/\/)?(?:www\.)?kick\.com\/([a-zA-Z0-9_]+)/,
+    /(?:https?:\/\/)?(?:www\.)?kick\.com\/([a-zA-Z0-9_]+)\/videos\/([a-zA-Z0-9-]+)/, // Kick video
+    /(?:https?:\/\/)?(?:www\.)?kick\.com\/([a-zA-Z0-9_]+)/, // Kick livestream
     /(?:https?:\/\/)?player\.kick\.com\/([a-zA-Z0-9_]+)/
   ];
   
@@ -46,7 +47,7 @@ function getVideoType(url) {
   } else if (url.includes('twitch.tv')) {
     return url.includes('/videos/') ? 'twitch-video' : 'twitch-stream';
   } else if (url.includes('kick.com')) {
-    return url.includes('/video/') ? 'kick-video' : 'kick-stream';
+    return url.includes('/videos/') ? 'kick-video' : 'kick-stream';
   }
   return null;
 }
