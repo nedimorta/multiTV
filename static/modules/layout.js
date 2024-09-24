@@ -67,7 +67,7 @@ function setGridView(columns, rows) {
       box.className = 'iframe-box';
       box.innerHTML = `
         <div class="input-container">
-          <input type="text" id="url${i + 1}" placeholder="Enter YouTube URL" class="form-control"/>
+          <input type="text" id="url${i + 1}" placeholder="Enter video URL" class="form-control"/>
           <button class="btn btn-primary add-button">+</button>
         </div>
       `;
@@ -99,7 +99,7 @@ function setGridView(columns, rows) {
     } else {
       box.innerHTML = `
         <div class="input-container">
-          <input type="text" id="url${index + 1}" placeholder="Enter YouTube URL" class="form-control"/>
+          <input type="text" id="url${index + 1}" placeholder="Enter video URL" class="form-control"/>
           <button class="btn btn-primary add-button">+</button>
         </div>
       `;
