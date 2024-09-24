@@ -34,6 +34,12 @@ function adjustIframeSizes() {
       iframe.style.position = 'absolute';
       iframe.style.top = '0';
       iframe.style.left = '0';
+
+      // Add this check for Kick videos
+      const videoContainer = box.querySelector('.video-container');
+      if (videoContainer && (videoContainer.classList.contains('kick-video') || videoContainer.classList.contains('kick-stream'))) {
+        iframe.style.objectFit = 'contain';
+      }
     }
   });
 
