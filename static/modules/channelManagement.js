@@ -70,17 +70,17 @@ function addChannel(boxId, url) {
     let embedHtml;
     switch (videoType) {
       case 'youtube':
-        embedHtml = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" allowfullscreen></iframe>`;
+        embedHtml = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" frameborder="0" allowfullscreen></iframe>`;
         break;
       case 'twitch-video':
-        embedHtml = `<iframe src="https://player.twitch.tv/?video=${videoId}&parent=${window.location.hostname}&autoplay=true" allowfullscreen></iframe>`;
+        embedHtml = `<iframe src="https://player.twitch.tv/?video=${videoId}&parent=${window.location.hostname}&autoplay=true" frameborder="0" allowfullscreen></iframe>`;
         break;
       case 'twitch-stream':
-        embedHtml = `<iframe src="https://player.twitch.tv/?channel=${videoId}&parent=${window.location.hostname}&autoplay=true" allowfullscreen></iframe>`;
+        embedHtml = `<iframe src="https://player.twitch.tv/?channel=${videoId}&parent=${window.location.hostname}&autoplay=true" frameborder="0" allowfullscreen></iframe>`;
         break;
       case 'kick-video':
       case 'kick-stream':
-        embedHtml = `<iframe src="https://player.kick.com/${videoId}" allowfullscreen></iframe>`;
+        embedHtml = `<iframe src="https://player.kick.com/${videoId}?autoplay=true&muted=false" frameborder="0" scrolling="no" allowfullscreen></iframe>`;
         break;
     }
 

@@ -128,7 +128,7 @@ function applyConfiguration(config) {
         iframeBoxes.forEach((box, index) => {
             box.innerHTML = `
                 <div class="input-container">
-                    <input type="text" id="url${index}" placeholder="Enter YouTube URL" class="form-control">
+                    <input type="text" id="url${index}" placeholder="Enter video URL" class="form-control">
                     <button class="btn btn-primary add-button">+</button>
                 </div>
             `;

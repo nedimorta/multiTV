@@ -62,7 +62,7 @@ func Grid(initialGrid []int) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" placeholder=\"Enter YouTube URL\" class=\"form-control\"> <button class=\"btn btn-primary add-button\">+</button></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" placeholder=\"Enter video URL\" class=\"form-control\"> <button class=\"btn btn-primary add-button\">+</button></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
