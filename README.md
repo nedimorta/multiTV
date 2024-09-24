@@ -1,70 +1,39 @@
 # Multi-TV
 
-Multi-TV is a web application that allows users to watch multiple YouTube videos simultaneously in a customizable grid layout. It provides features such as drag-and-drop video rearrangement, various grid layouts, and the ability to save and load configurations.
+Multi-TV is a web application that allows users to watch multiple video streams simultaneously in a customizable grid layout. It supports YouTube videos, Twitch streams, and Kick streams.
 
 ## Features
 
-- Watch multiple YouTube videos in a single view
-- Customizable grid layouts (1x2, 2x2, 2x3, 3x3, 4x3, 4x4)
-- Drag-and-drop functionality to rearrange videos
-- Save and load grid configurations
-- Responsive design for various screen sizes
+- Watch multiple video streams in a single view
+- Supports YouTube videos, Twitch streams, and Kick streams
+- Customizable grid layout (1x2, 2x2, 3x2, 3x3, 4x3, 4x4)
+- Drag and drop functionality to rearrange video positions
+- Save and load configurations
+- Responsive design that adapts to different screen sizes
 
-## Setup Instructions
+## Recent Updates
 
-### Prerequisites
-
-- Go (1.16 or later)
-- Node.js and npm (for managing frontend dependencies)
-
-### Installation
-
-1. Clone the repository:
-
-`git clone https://github.com/yourusername/multi-tv.git`\
-`cd multi-tv`
-
-2. Install Go dependencies:
-
-`go mod tidy`
-
-3. Install frontend dependencies:
-
-`npm install`
-
-### Running the Application
-
-1. Start the Go server:
-
-`go run main.go`
-
-2. Open your web browser and navigate to `http://localhost:8080`.
+- Added support for Kick streams
+- Improved video sizing to ensure videos fit within their containers while maintaining aspect ratio
+- Updated placeholder text to be more inclusive of different video platforms
 
 ## Usage
 
-1. Select a grid layout from the "Grid View" dropdown menu in the navigation bar.
-2. Enter YouTube video URLs in the input fields and click the "+" button to add videos to the grid.
-3. Drag and drop videos using the "☰" button to rearrange them within the grid.
-4. Use the "X" button on each video to remove it from the grid.
+1. Enter a video URL (YouTube, Twitch, or Kick) in any of the input boxes.
+2. Click the '+' button or press Enter to add the video to the grid.
+3. Use the 'Grid View' dropdown in the navbar to change the grid layout.
+4. Drag and drop videos to rearrange their positions.
+5. Use the 'Save' and 'Load' options in the navbar to save or load your configurations.
 
-### Saving and Loading Configurations
+## Development
 
-- To save your current configuration:
-  1. Click on the "Save" button in the navigation bar.
-  2. Choose a location on your computer to save the configuration file.
+To set up the project for development:
 
-- To load a previously saved configuration:
-  1. Click on the "Load" button in the navigation bar.
-  2. Select the configuration file you want to load.
-
-## Project Structure
-
-- `main.go`: Entry point of the application
-- `handlers/`: HTTP request handlers
-- `views/`: HTML templates and components
-- `static/`: CSS, JavaScript, and other static assets
-- `businesslogic/`: Business logic layer
-- `dataaccess/`: Data access layer (currently not in use)
+1. Clone the repository
+2. Install dependencies (if any)
+3. Run the Go server:
+   ```go run main.go```
+4. Open a web browser and navigate to `http://localhost:8080`
 
 ## Contributing
 
@@ -72,10 +41,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Acknowledgements
-
-- [YouTube IFrame Player API](https://developers.google.com/youtube/iframe_api_reference)
-- [Bootstrap](https://getbootstrap.com/)
-- [templ](https://github.com/a-h/templ)
+[MIT License](LICENSE)

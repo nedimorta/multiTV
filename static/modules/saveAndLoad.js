@@ -1,5 +1,5 @@
 import { adjustIframeSizes, setGridView } from './layout.js';
-import { extractVideoId } from './utils.js';
+import { extractVideoId, getVideoType } from './utils.js';
 
 function saveConfiguration(event) {
     if (event) event.preventDefault();
@@ -14,16 +14,23 @@ function saveConfiguration(event) {
 
     iframeBoxes.forEach((box, index) => {
         const iframe = box.querySelector('iframe');
+        const videoContainer = box.querySelector('.video-container');
         if (iframe && iframe.src) {
+            console.log(`Processing box ${index}, iframe src: ${iframe.src}`);
             const videoId = extractVideoId(iframe.src);
-            if (videoId) {
+            const videoType = videoContainer ? videoContainer.classList[1] : getVideoType(iframe.src);
+            console.log(`Extracted videoId: ${videoId}, videoType: ${videoType}`);
+            if (videoId && videoType) {
                 config.videos.push({
                     index: index,
-                    videoId: videoId
+                    videoId: videoId,
+                    videoType: videoType
                 });
             } else {
-                console.warn(`Could not extract video ID for box ${index}`);
+                console.warn(`Could not extract video ID or type for box ${index}`);
             }
+        } else {
+            console.log(`Box ${index} does not contain an iframe or has no src`);
         }
     });
 
@@ -83,7 +90,7 @@ function isValidConfig(config) {
     }
     
     for (let video of config.videos) {
-        if (typeof video.index !== 'number' || typeof video.videoId !== 'string') {
+        if (typeof video.index !== 'number' || typeof video.videoId !== 'string' || typeof video.videoType !== 'string') {
             console.error('Invalid video entry:', video);
             return false;
         }
@@ -131,8 +138,26 @@ function applyConfiguration(config) {
         config.videos.forEach((video) => {
             if (video.index < iframeBoxes.length) {
                 const box = iframeBoxes[video.index];
+                let embedUrl;
+                switch (video.videoType) {
+                    case 'youtube':
+                        embedUrl = `https://www.youtube-nocookie.com/embed/${video.videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1`;
+                        break;
+                    case 'twitch-video':
+                        embedUrl = `https://player.twitch.tv/?video=${video.videoId}&parent=${window.location.hostname}&autoplay=true`;
+                        break;
+                    case 'twitch-stream':
+                        embedUrl = `https://player.twitch.tv/?channel=${video.videoId}&parent=${window.location.hostname}&autoplay=true`;
+                        break;
+                    case 'kick-video':
+                        embedUrl = `https://player.kick.com/${video.videoId}`;
+                        break;
+                    case 'kick-stream':
+                        embedUrl = `https://player.kick.com/${video.videoId}`;
+                        break;
+                }
                 box.innerHTML = `
-                    <iframe src="https://www.youtube-nocookie.com/embed/${video.videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" allowfullscreen></iframe>
+                    <iframe src="${embedUrl}" allowfullscreen></iframe>
                     <div class="button-container">
                         <button class="drag-button" onmousedown="event.preventDefault()">☰</button>
                         <button class="reset-button">X</button>
