@@ -60,7 +60,7 @@ function resetChannel(boxId) {
 function addChannel(boxId, url) {
   console.log(`Trying to add a video to ${boxId}. Let's see if this URL works: ${url}`);
   const videoId = extractVideoId(url);
-  const videoType = getVideoType(url);
+  let videoType = getVideoType(url);
   console.log(`Alright, we got a video ID: ${videoId} and type: ${videoType}`);
   
   const box = document.getElementById(boxId);
@@ -70,12 +70,12 @@ function addChannel(boxId, url) {
     let embedHtml;
     let videoClass;
     switch (videoType) {
-      case 'youtube':
+      case 'youtube-video':
         embedHtml = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" frameborder="0" allowfullscreen></iframe>`;
         videoClass = 'youtube-video';
         break;
       case 'youtube-live':
-        embedHtml = `<iframe src="https://www.youtube.com/embed/live_stream?channel=${videoId}&autoplay=1&mute=1&controls=1&enablejsapi=1" frameborder="0" allowfullscreen></iframe>`;
+        embedHtml = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" frameborder="0" allowfullscreen></iframe>`;
         videoClass = 'youtube-live';
         break;
       case 'twitch-video':
@@ -87,7 +87,8 @@ function addChannel(boxId, url) {
         videoClass = 'twitch-stream';
         break;
       case 'kick-video':
-        embedHtml = `<iframe src="https://player.kick.com/video/${videoId}" frameborder="0" scrolling="no" allowfullscreen></iframe>`;
+        // Use the extracted video URL directly
+        embedHtml = `<iframe src="${videoId}" frameborder="0" allowfullscreen></iframe>`;
         videoClass = 'kick-video';
         break;
       case 'kick-stream':
