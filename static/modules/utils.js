@@ -11,17 +11,22 @@ function extractVideoId(url) {
     /(?:https?:\/\/)?player\.twitch\.tv\/\?video=v?(\d+)/,
     /(?:https?:\/\/)?player\.twitch\.tv\/\?channel=([a-zA-Z0-9_]+)/,
     // Kick
-    /(?:https?:\/\/)?(?:www\.)?kick\.com\/video\/([a-zA-Z0-9-]+)/,
-    /(?:https?:\/\/)?(?:www\.)?kick\.com\/([a-zA-Z0-9_]+)\/videos\/([a-zA-Z0-9-]+)/, // Kick video
-    /(?:https?:\/\/)?(?:www\.)?kick\.com\/([a-zA-Z0-9_]+)/, // Kick livestream
-    /(?:https?:\/\/)?player\.kick\.com\/([a-zA-Z0-9_]+)/
+    /(?:https?:\/\/)?(?:www\.)?kick\.com\/[^\/]+\/videos\/([a-zA-Z0-9-]+)/, // Kick video
+    /(?:https?:\/\/)?(?:www\.)?kick\.com\/([^\/]+)/, // Kick livestream
   ];
   
   for (let regex of regexes) {
     const match = url.match(regex);
-    if (match && match[1]) {
-      console.log(`Video ID extracted: ${match[1]}`);
-      return match[1];
+    if (match) {
+      if (url.includes('kick.com') && match[1]) {
+        // For Kick videos, return the full URL
+        const videoUrl = `https://kick.com/${match[1]}`;
+        console.log(`Kick video URL extracted: ${videoUrl}`);
+        return videoUrl;
+      } else if (match[1]) {
+        console.log(`Video ID extracted: ${match[1]}`);
+        return match[1];
+      }
     }
   }
   
@@ -43,7 +48,23 @@ function extractVideoId(url) {
 
 function getVideoType(url) {
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
-    return 'youtube';
+    // Check if it's a live stream
+    if (url.includes('live_stream') || url.includes('channel') || url.includes('c/')) {
+      return 'youtube-live';
+    }
+    // If it's not a live stream, check if it's currently live
+    const videoId = extractVideoId(url);
+    if (videoId) {
+      fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.title && data.title.toLowerCase().includes('live')) {
+            return 'youtube-live';
+          }
+        })
+        .catch(error => console.error('Error checking if YouTube video is live:', error));
+    }
+    return 'youtube-video';
   } else if (url.includes('twitch.tv')) {
     return url.includes('/videos/') ? 'twitch-video' : 'twitch-stream';
   } else if (url.includes('kick.com')) {

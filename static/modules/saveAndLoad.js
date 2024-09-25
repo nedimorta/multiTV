@@ -18,7 +18,13 @@ function saveConfiguration(event) {
         if (iframe && iframe.src) {
             console.log(`Processing box ${index}, iframe src: ${iframe.src}`);
             const videoId = extractVideoId(iframe.src);
-            const videoType = videoContainer ? videoContainer.classList[1] : getVideoType(iframe.src);
+            let videoType = videoContainer ? videoContainer.classList[1] : getVideoType(iframe.src);
+            
+            // Check if it's a YouTube live stream
+            if (videoType === 'youtube-video' && iframe.src.includes('live_stream')) {
+                videoType = 'youtube-live';
+            }
+            
             console.log(`Extracted videoId: ${videoId}, videoType: ${videoType}`);
             if (videoId && videoType) {
                 config.videos.push({
@@ -138,26 +144,41 @@ function applyConfiguration(config) {
         config.videos.forEach((video) => {
             if (video.index < iframeBoxes.length) {
                 const box = iframeBoxes[video.index];
-                let embedUrl;
+                let embedHtml;
+                let videoClass;
                 switch (video.videoType) {
-                    case 'youtube':
-                        embedUrl = `https://www.youtube-nocookie.com/embed/${video.videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1`;
+                    case 'youtube-video':
+                        embedHtml = `<iframe src="https://www.youtube-nocookie.com/embed/${video.videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" frameborder="0" allowfullscreen></iframe>`;
+                        videoClass = 'youtube-video';
+                        break;
+                    case 'youtube-live':
+                        embedHtml = `<iframe src="https://www.youtube.com/embed/live_stream?channel=${video.videoId}&autoplay=1&mute=1&controls=1&enablejsapi=1" frameborder="0" allowfullscreen></iframe>`;
+                        videoClass = 'youtube-live';
                         break;
                     case 'twitch-video':
-                        embedUrl = `https://player.twitch.tv/?video=${video.videoId}&parent=${window.location.hostname}&autoplay=true`;
+                        embedHtml = `<iframe src="https://player.twitch.tv/?video=${video.videoId}&parent=${window.location.hostname}&autoplay=true" frameborder="0" allowfullscreen></iframe>`;
+                        videoClass = 'twitch-video';
                         break;
                     case 'twitch-stream':
-                        embedUrl = `https://player.twitch.tv/?channel=${video.videoId}&parent=${window.location.hostname}&autoplay=true`;
+                        embedHtml = `<iframe src="https://player.twitch.tv/?channel=${video.videoId}&parent=${window.location.hostname}&autoplay=true" frameborder="0" allowfullscreen></iframe>`;
+                        videoClass = 'twitch-stream';
                         break;
                     case 'kick-video':
-                        embedUrl = `https://player.kick.com/${video.videoId}`;
+                        embedHtml = `<iframe src="https://kick.com/${video.videoId}" frameborder="0" allowfullscreen></iframe>`;
+                        videoClass = 'kick-video';
                         break;
                     case 'kick-stream':
-                        embedUrl = `https://player.kick.com/${video.videoId}`;
+                        embedHtml = `<iframe src="https://player.kick.com/${video.videoId}" frameborder="0" scrolling="no" allowfullscreen></iframe>`;
+                        videoClass = 'kick-stream';
                         break;
+                    default:
+                        console.warn(`Unknown video type: ${video.videoType}`);
+                        return; // Skip this video
                 }
                 box.innerHTML = `
-                    <iframe src="${embedUrl}" allowfullscreen></iframe>
+                    <div class="video-container ${videoClass}">
+                        ${embedHtml}
+                    </div>
                     <div class="button-container">
                         <button class="drag-button" onmousedown="event.preventDefault()">☰</button>
                         <button class="reset-button">X</button>
