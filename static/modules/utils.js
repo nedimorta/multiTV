@@ -11,18 +11,22 @@ function extractVideoId(url) {
     /(?:https?:\/\/)?player\.twitch\.tv\/\?video=v?(\d+)/,
     /(?:https?:\/\/)?player\.twitch\.tv\/\?channel=([a-zA-Z0-9_]+)/,
     // Kick
-    /(?:https?:\/\/)?(?:www\.)?kick\.com\/[^\/]+\/videos\/([a-zA-Z0-9-]+)/, // Kick video
+    /(?:https?:\/\/)?(?:www\.)?kick\.com\/([^\/]+)\/videos\/([a-zA-Z0-9-]+)/, // Kick video
     /(?:https?:\/\/)?(?:www\.)?kick\.com\/([^\/]+)/, // Kick livestream
   ];
   
   for (let regex of regexes) {
     const match = url.match(regex);
     if (match) {
-      if (url.includes('kick.com') && match[1]) {
+      if (url.includes('kick.com') && match[2]) {
         // For Kick videos, return the full URL
-        const videoUrl = `https://kick.com/${match[1]}`;
+        const videoUrl = `https://kick.com/${match[2]}`;
         console.log(`Kick video URL extracted: ${videoUrl}`);
         return videoUrl;
+      } else if (url.includes('kick.com') && match[1]) {
+        // For Kick livestreams, return the username
+        console.log(`Kick livestream ID extracted: ${match[1]}`);
+        return match[1];
       } else if (match[1]) {
         console.log(`Video ID extracted: ${match[1]}`);
         return match[1];

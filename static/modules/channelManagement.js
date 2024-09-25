@@ -59,40 +59,40 @@ function resetChannel(boxId) {
 
 function addChannel(boxId, url) {
   console.log(`Trying to add a video to ${boxId}. Let's see if this URL works: ${url}`);
-  const videoUrl = extractVideoId(url);
+  const videoId = extractVideoId(url);
   let videoType = getVideoType(url);
-  console.log(`Alright, we got a video URL: ${videoUrl} and type: ${videoType}`);
+  console.log(`Alright, we got a video ID: ${videoId} and type: ${videoType}`);
   
   const box = document.getElementById(boxId);
   const input = box.querySelector('input');
 
-  if (videoUrl && videoType) {
+  if (videoId && videoType) {
     let embedHtml;
     let videoClass;
     switch (videoType) {
       case 'youtube-video':
-        embedHtml = `<iframe src="https://www.youtube-nocookie.com/embed/${videoUrl}?autoplay=1&mute=1&controls=1&enablejsapi=1" frameborder="0" allowfullscreen></iframe>`;
+        embedHtml = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" frameborder="0" allowfullscreen></iframe>`;
         videoClass = 'youtube-video';
         break;
       case 'youtube-live':
-        embedHtml = `<iframe src="https://www.youtube.com/embed/${videoUrl}?autoplay=1&mute=1&controls=1&enablejsapi=1" frameborder="0" allowfullscreen></iframe>`;
+        embedHtml = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" frameborder="0" allowfullscreen></iframe>`;
         videoClass = 'youtube-live';
         break;
       case 'twitch-video':
-        embedHtml = `<iframe src="https://player.twitch.tv/?video=${videoUrl}&parent=${window.location.hostname}&autoplay=true" frameborder="0" allowfullscreen></iframe>`;
+        embedHtml = `<iframe src="https://player.twitch.tv/?video=${videoId}&parent=${window.location.hostname}&autoplay=true" frameborder="0" allowfullscreen></iframe>`;
         videoClass = 'twitch-video';
         break;
       case 'twitch-stream':
-        embedHtml = `<iframe src="https://player.twitch.tv/?channel=${videoUrl}&parent=${window.location.hostname}&autoplay=true" frameborder="0" allowfullscreen></iframe>`;
+        embedHtml = `<iframe src="https://player.twitch.tv/?channel=${videoId}&parent=${window.location.hostname}&autoplay=true" frameborder="0" allowfullscreen></iframe>`;
         videoClass = 'twitch-stream';
         break;
       case 'kick-video':
         // Use the extracted video URL directly
-        embedHtml = `<iframe src="${videoUrl}" frameborder="0" allowfullscreen></iframe>`;
+        embedHtml = `<iframe src="${videoId}" frameborder="0" allowfullscreen></iframe>`;
         videoClass = 'kick-video';
         break;
       case 'kick-stream':
-        embedHtml = `<iframe src="https://player.kick.com/${videoUrl}" frameborder="0" scrolling="no" allowfullscreen></iframe>`;
+        embedHtml = `<iframe src="https://player.kick.com/${videoId}" frameborder="0" scrolling="no" allowfullscreen></iframe>`;
         videoClass = 'kick-stream';
         break;
     }
@@ -107,7 +107,7 @@ function addChannel(boxId, url) {
       </div>
     `;
     videoStates[boxId] = {
-      src: videoUrl,
+      src: videoId,
       currentTime: 0,
       type: videoType
     };

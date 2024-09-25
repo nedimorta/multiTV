@@ -164,7 +164,7 @@ function applyConfiguration(config) {
                         videoClass = 'twitch-stream';
                         break;
                     case 'kick-video':
-                        embedHtml = `<iframe src="https://kick.com/${video.videoId}" frameborder="0" allowfullscreen></iframe>`;
+                        embedHtml = `<iframe src="${video.videoId}" frameborder="0" allowfullscreen></iframe>`;
                         videoClass = 'kick-video';
                         break;
                     case 'kick-stream':
