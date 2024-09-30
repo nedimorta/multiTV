@@ -52,15 +52,23 @@ function setupEventListeners() {
   });
 
   // Validate URL and change text color accordingly
-  iframeContainer.addEventListener('input', (event) => {
-    if (event.target.tagName === 'INPUT') {
-      const input = event.target;
-      const videoId = extractVideoId(input.value);
+  async function validateInput(input) {
+    try {
+      const videoId = await extractVideoId(input.value);
       if (videoId) {
         input.style.color = '';
       } else {
         input.style.color = 'red';
       }
+    } catch (error) {
+      console.error('Error validating input:', error);
+      input.style.color = 'red';
+    }
+  }
+
+  iframeContainer.addEventListener('input', async (event) => {
+    if (event.target.tagName === 'INPUT') {
+      await validateInput(event.target);
     }
   });
 }

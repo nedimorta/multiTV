@@ -7,8 +7,8 @@ import (
 	"multi-tv/views/layouts"
 )
 
-templ Index(initialGrid []int) {
+templ Index(initialGrid []int, columns int, rows int) {
 	@layouts.Main(templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		return components.Grid(initialGrid).Render(ctx, w)
+		return components.Grid(initialGrid, columns, rows).Render(ctx, w)
 	}))
 }

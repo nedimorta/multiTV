@@ -1,59 +1,66 @@
 import { adjustIframeSizes, setGridView } from './layout.js';
-import { extractVideoId, getVideoType } from './utils.js';
+import { extractMultipleVideoInfo } from './utils.js';
+import { videoStates, restoreYouTubeState, restoreTwitchState, restoreKickState, addChannel, storeVideoStates } from './channelManagement.js';
 
-function saveConfiguration(event) {
+async function saveConfiguration(event) {
     if (event) event.preventDefault();
+    
+    console.log('Saving configuration...');
+    await storeVideoStates();
+    
     const iframeContainer = document.getElementById('iframeContainer');
     const iframeBoxes = iframeContainer.querySelectorAll('.iframe-box');
     const config = {
         gridSize: iframeBoxes.length,
-        columns: iframeContainer.style.gridTemplateColumns.split(' ').length,
-        rows: iframeContainer.style.gridTemplateRows.split(' ').length,
+        columns: iframeContainer.className.match(/grid-(\d+)x/)[1],
+        rows: iframeContainer.className.match(/x(\d+)/)[1],
         videos: []
     };
 
-    iframeBoxes.forEach((box, index) => {
+    for (const box of iframeBoxes) {
         const iframe = box.querySelector('iframe');
-        const videoContainer = box.querySelector('.video-container');
         if (iframe && iframe.src) {
-            console.log(`Processing box ${index}, iframe src: ${iframe.src}`);
-            const videoId = extractVideoId(iframe.src);
-            let videoType = videoContainer ? videoContainer.classList[1] : getVideoType(iframe.src);
+            const videoType = box.querySelector('.video-container').className.split(' ')[1];
+            const videoState = videoStates[box.id] || {};
+            let videoId = videoState.videoId || iframe.src;
+            let currentTime = videoState.currentTime || 0;
             
-            // Check if it's a YouTube live stream
-            if (videoType === 'youtube-video' && iframe.src.includes('live_stream')) {
-                videoType = 'youtube-live';
+            if (videoType.includes('youtube')) {
+                const player = YT.get(iframe.id);
+                if (player && player.getCurrentTime) {
+                    currentTime = player.getCurrentTime();
+                    videoId = player.getVideoData().video_id;
+                }
+            } else if (videoType.includes('twitch')) {
+                if (videoType === 'twitch-video') {
+                    videoId = videoId.split('video=')[1]?.split('&')[0] || videoId;
+                } else if (videoType === 'twitch-stream') {
+                    videoId = videoId.split('channel=')[1]?.split('&')[0] || videoId;
+                }
+                currentTime = videoState.currentTime || 0;
             }
             
-            console.log(`Extracted videoId: ${videoId}, videoType: ${videoType}`);
-            if (videoId && videoType) {
-                config.videos.push({
-                    index: index,
-                    videoId: videoId,
-                    videoType: videoType
-                });
-            } else {
-                console.warn(`Could not extract video ID or type for box ${index}`);
-            }
-        } else {
-            console.log(`Box ${index} does not contain an iframe or has no src`);
+            config.videos.push({
+                index: Array.from(iframeBoxes).indexOf(box),
+                videoId: videoId,
+                videoType: videoType,
+                currentTime: currentTime,
+                volume: videoState.volume || 1,
+                quality: videoState.quality,
+            });
+
+            console.log(`${videoType} in ${box.id} current time:`, currentTime);
         }
-    });
-
-    console.log('Saving configuration:', config);
-
-    if (config.videos.length === 0) {
-        console.warn('No videos found to save.');
-        alert('No videos found to save. Please add some videos before saving.');
-        return;
     }
+
+    console.log('All video states before saving:', JSON.parse(JSON.stringify(videoStates)));
+    console.log('Configuration being saved:', JSON.stringify(config, null, 2));
 
     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = 'multi-tv-config.json';
-    a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -62,134 +69,105 @@ function saveConfiguration(event) {
 
 function loadConfiguration(event) {
     if (event) event.preventDefault();
+    
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
-    input.onchange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const config = JSON.parse(e.target.result);
-                    console.log('Loaded config:', config);
-                    if (isValidConfig(config)) {
-                        applyConfiguration(config);
-                    } else {
-                        throw new Error('Invalid configuration file');
-                    }
-                } catch (error) {
-                    console.error('Error loading configuration:', error);
-                    alert('Error loading configuration: ' + error.message);
+    
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const config = JSON.parse(e.target.result);
+                if (isValidConfig(config)) {
+                    applyConfiguration(config);
+                } else {
+                    throw new Error('Invalid configuration file');
                 }
-            };
-            reader.readAsText(file);
-        }
+            } catch (error) {
+                console.error('Error loading configuration:', error);
+                alert('Error loading configuration: ' + error.message);
+            }
+        };
+        reader.readAsText(file);
     };
+    
     input.click();
 }
 
 function isValidConfig(config) {
-    if (!config || typeof config.gridSize !== 'number' || !Array.isArray(config.videos)) {
-        console.error('Invalid config structure:', config);
-        return false;
+    return config && typeof config.gridSize === 'number' && Array.isArray(config.videos);
+}
+
+async function applyConfiguration(config) {
+    setGridView(parseInt(config.columns), parseInt(config.rows));
+    
+    const iframeContainer = document.getElementById('iframeContainer');
+    iframeContainer.innerHTML = ''; // Clear existing content
+    
+    for (let i = 0; i < config.gridSize; i++) {
+        const box = document.createElement('div');
+        box.id = `box${i + 1}`;
+        box.className = 'iframe-box';
+        box.innerHTML = `
+            <div class="input-container">
+                <input type="text" id="url${i + 1}" placeholder="Enter video URL" class="form-control">
+                <button class="btn btn-primary add-button">+</button>
+            </div>
+        `;
+        iframeContainer.appendChild(box);
     }
     
-    for (let video of config.videos) {
-        if (typeof video.index !== 'number' || typeof video.videoId !== 'string' || typeof video.videoType !== 'string') {
-            console.error('Invalid video entry:', video);
-            return false;
+    for (const video of config.videos) {
+        if (video.index < config.gridSize) {
+            const boxId = `box${video.index + 1}`;
+            let url;
+            switch (video.videoType) {
+                case 'youtube-video':
+                    url = `https://www.youtube.com/watch?v=${video.videoId}`;
+                    break;
+                case 'twitch-video':
+                    url = `https://www.twitch.tv/videos/${video.videoId}`;
+                    break;
+                case 'twitch-stream':
+                    url = `https://www.twitch.tv/${video.videoId}`;
+                    break;
+                case 'kick-video':
+                case 'kick-stream':
+                    url = video.videoId; // Assuming videoId is the full URL for Kick
+                    break;
+                default:
+                    console.error(`Unknown video type: ${video.videoType}`);
+                    continue;
+            }
+            await addChannel(boxId, url);
+            
+            // Set the saved state
+            if (videoStates[boxId]) {
+                videoStates[boxId].currentTime = video.currentTime;
+                videoStates[boxId].volume = video.volume;
+                videoStates[boxId].quality = video.quality;
+                
+                // Apply the saved time
+                if (video.videoType.includes('youtube')) {
+                    const player = YT.get(`iframe-${boxId}`);
+                    if (player && player.seekTo) {
+                        player.seekTo(video.currentTime);
+                    }
+                } else if (video.videoType.includes('twitch')) {
+                    const player = videoStates[boxId].twitchPlayer;
+                    if (player && player.seek) {
+                        player.seek(video.currentTime);
+                    }
+                }
+            }
         }
     }
     
-    return true;
-}
-
-function applyConfiguration(config) {
-    console.log('Applying configuration:', config);
-
-    let columns, rows;
-    if (config.gridSize <= 2) {
-        columns = 1; rows = 2;
-    } else if (config.gridSize <= 4) {
-        columns = 2; rows = 2;
-    } else if (config.gridSize <= 6) {
-        columns = 3; rows = 2;
-    } else if (config.gridSize <= 9) {
-        columns = 3; rows = 3;
-    } else if (config.gridSize <= 12) {
-        columns = 4; rows = 3;
-    } else {
-        columns = 4; rows = 4;
-    }
-
-    setGridView(columns, rows);
-
-    // Wait for the grid to update before adding videos
-    setTimeout(() => {
-        const iframeContainer = document.getElementById('iframeContainer');
-        const iframeBoxes = iframeContainer.querySelectorAll('.iframe-box');
-
-        // Reset all boxes
-        iframeBoxes.forEach((box, index) => {
-            box.innerHTML = `
-                <div class="input-container">
-                    <input type="text" id="url${index}" placeholder="Enter video URL" class="form-control">
-                    <button class="btn btn-primary add-button">+</button>
-                </div>
-            `;
-        });
-
-        // Add videos from the configuration
-        config.videos.forEach((video) => {
-            if (video.index < iframeBoxes.length) {
-                const box = iframeBoxes[video.index];
-                let embedHtml;
-                let videoClass;
-                switch (video.videoType) {
-                    case 'youtube-video':
-                        embedHtml = `<iframe src="https://www.youtube-nocookie.com/embed/${video.videoId}?autoplay=1&mute=1&controls=1&enablejsapi=1" frameborder="0" allowfullscreen></iframe>`;
-                        videoClass = 'youtube-video';
-                        break;
-                    case 'youtube-live':
-                        embedHtml = `<iframe src="https://www.youtube.com/embed/live_stream?channel=${video.videoId}&autoplay=1&mute=1&controls=1&enablejsapi=1" frameborder="0" allowfullscreen></iframe>`;
-                        videoClass = 'youtube-live';
-                        break;
-                    case 'twitch-video':
-                        embedHtml = `<iframe src="https://player.twitch.tv/?video=${video.videoId}&parent=${window.location.hostname}&autoplay=true" frameborder="0" allowfullscreen></iframe>`;
-                        videoClass = 'twitch-video';
-                        break;
-                    case 'twitch-stream':
-                        embedHtml = `<iframe src="https://player.twitch.tv/?channel=${video.videoId}&parent=${window.location.hostname}&autoplay=true" frameborder="0" allowfullscreen></iframe>`;
-                        videoClass = 'twitch-stream';
-                        break;
-                    case 'kick-video':
-                        embedHtml = `<iframe src="${video.videoId}" frameborder="0" allowfullscreen></iframe>`;
-                        videoClass = 'kick-video';
-                        break;
-                    case 'kick-stream':
-                        embedHtml = `<iframe src="https://player.kick.com/${video.videoId}" frameborder="0" scrolling="no" allowfullscreen></iframe>`;
-                        videoClass = 'kick-stream';
-                        break;
-                    default:
-                        console.warn(`Unknown video type: ${video.videoType}`);
-                        return; // Skip this video
-                }
-                box.innerHTML = `
-                    <div class="video-container ${videoClass}">
-                        ${embedHtml}
-                    </div>
-                    <div class="button-container">
-                        <button class="drag-button" onmousedown="event.preventDefault()">☰</button>
-                        <button class="reset-button">X</button>
-                    </div>
-                `;
-            }
-        });
-
-        adjustIframeSizes();
-        console.log('Configuration applied successfully');
-    }, 100);
+    adjustIframeSizes();
 }
 
 export { saveConfiguration, loadConfiguration };
