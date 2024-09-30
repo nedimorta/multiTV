@@ -23,14 +23,34 @@ body {
 }
 
 .iframe-container {
-  flex: 1;
   display: grid;
   gap: 0.25vh;
   padding: 0.5vh;
-  overflow: hidden;
   width: 100%;
   height: calc(100vh - var(--navbar-height, 42px));
-  transition: grid-template-columns 0.3s ease, grid-template-rows 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+.grid-1x2 { grid-template-columns: 1fr; grid-template-rows: repeat(2, 1fr); }
+.grid-2x2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+.grid-3x2 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
+.grid-3x3 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+.grid-4x3 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); }
+.grid-4x4 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); }
+
+/* Add these media queries for responsive grid layouts */
+@media (max-width: 768px) {
+  .iframe-container {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(auto-fill, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .iframe-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(auto-fill, 1fr);
+  }
 }
 
 .iframe-box {
@@ -228,4 +248,11 @@ body {
 
 .custom-alert-content p {
   margin: 0 0 20px;
+}
+
+.kick-stream iframe, .kick-video iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  overflow: hidden;
 }

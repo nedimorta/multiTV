@@ -18,11 +18,8 @@ function adjustIframeSizes() {
     columns = 4; rows = 4;
   }
 
-  // Set up our grid.
-  iframeContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-  iframeContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+  iframeContainer.className = `iframe-container grid-${columns}x${rows}`;
 
-  // Make sure each box and iframe fills its space.
   iframeBoxes.forEach(box => {
     box.style.width = '100%';
     box.style.height = '100%';
@@ -77,11 +74,8 @@ function setGridView(columns, rows) {
     iframeContainer.appendChild(box);
   }
 
-  // Sets up the grid layout.
-  iframeContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-  iframeContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+  iframeContainer.className = `iframe-container grid-${columns}x${rows}`;
 
-  // Make sure everything fits nicely
   adjustIframeSizes();
 
   console.log(`Grid view set to ${columns}x${rows}.`);

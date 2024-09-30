@@ -15,7 +15,7 @@ import (
 	"multi-tv/views/layouts"
 )
 
-func Index(initialGrid []int) templ.Component {
+func Index(initialGrid []int, columns int, rows int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -37,7 +37,7 @@ func Index(initialGrid []int) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = layouts.Main(templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-			return components.Grid(initialGrid).Render(ctx, w)
+			return components.Grid(initialGrid, columns, rows).Render(ctx, w)
 		})).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

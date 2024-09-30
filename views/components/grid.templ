@@ -1,9 +1,10 @@
 package components
 
 import "strconv"
+import "fmt"
 
-templ Grid(initialGrid []int) {
-	<div id="iframeContainer" class="iframe-container">
+templ Grid(initialGrid []int, columns int, rows int) {
+	<div id="iframeContainer" class={ "iframe-container", getGridClass(columns, rows) }>
 		for _, i := range initialGrid {
 			<div id={ "box" + strconv.Itoa(i) } class="iframe-box">
 				<div class="input-container">
@@ -13,4 +14,8 @@ templ Grid(initialGrid []int) {
 			</div>
 		}
 	</div>
+}
+
+func getGridClass(columns int, rows int) string {
+	return fmt.Sprintf("grid-%dx%d", columns, rows)
 }

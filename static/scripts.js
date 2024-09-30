@@ -9,14 +9,8 @@ window.addChannel = addChannel;
 window.resetChannel = resetChannel;
 window.adjustIframeSizes = adjustIframeSizes;
 window.setGridView = setGridView;
-window.saveConfiguration = (event) => {
-  event.preventDefault();
-  saveConfiguration(event);
-};
-window.loadConfiguration = (event) => {
-  event.preventDefault();
-  loadConfiguration(event);
-};
+window.saveConfiguration = saveConfiguration;
+window.loadConfiguration = loadConfiguration;
 
 document.addEventListener('DOMContentLoaded', () => {
   adjustIframeSizes();
