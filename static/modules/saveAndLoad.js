@@ -57,14 +57,38 @@ async function saveConfiguration(event) {
     console.log('Configuration being saved:', JSON.stringify(config, null, 2));
 
     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'multi-tv-config.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const filename = 'multi-tv-config.json';
+
+    // Check if the browser supports the showSaveFilePicker API
+    if (window.showSaveFilePicker) {
+        try {
+            const handle = await window.showSaveFilePicker({
+                suggestedName: filename,
+                types: [{
+                    description: 'JSON Files',
+                    accept: {'application/json': ['.json']},
+                }],
+            });
+            const writable = await handle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                console.error('Failed to save file:', err);
+                alert('Failed to save file. Please try again.');
+            }
+        }
+    } else {
+        // Fallback for browsers that don't support showSaveFilePicker
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 }
 
 function loadConfiguration(event) {
@@ -168,6 +192,46 @@ async function applyConfiguration(config) {
     }
     
     adjustIframeSizes();
+}
+
+function showSaveModal(defaultFilename) {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.left = '0';
+        modal.style.top = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+
+        const content = document.createElement('div');
+        content.style.backgroundColor = 'white';
+        content.style.padding = '20px';
+        content.style.borderRadius = '5px';
+        content.innerHTML = `
+            <h3>Save Configuration</h3>
+            <input type="text" id="filename" value="${defaultFilename}" style="width: 100%; margin-bottom: 10px;">
+            <button id="saveBtn">Save</button>
+            <button id="cancelBtn">Cancel</button>
+        `;
+
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+
+        document.getElementById('saveBtn').onclick = () => {
+            const filename = document.getElementById('filename').value;
+            document.body.removeChild(modal);
+            resolve(filename);
+        };
+
+        document.getElementById('cancelBtn').onclick = () => {
+            document.body.removeChild(modal);
+            resolve(null);
+        };
+    });
 }
 
 export { saveConfiguration, loadConfiguration };
