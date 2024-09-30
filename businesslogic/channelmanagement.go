@@ -2,7 +2,6 @@ package businesslogic
 
 import (
 	"regexp"
-	"strings"
 )
 
 // Channels stores user-provided channels.
@@ -18,13 +17,55 @@ func AddChannel(name string, url string) {
 
 // ExtractVideoInfo extracts the video ID and type from a URL.
 func ExtractVideoInfo(url string) (string, string) {
+	if id, typ := extractYouTubeInfo(url); id != "" {
+		return id, typ
+	}
+	if id, typ := extractTwitchInfo(url); id != "" {
+		return id, typ
+	}
+	if id, typ := extractKickInfo(url); id != "" {
+		return id, typ
+	}
+	return "", ""
+}
+
+func extractYouTubeInfo(url string) (string, string) {
 	regexes := map[string]string{
 		"youtube-video": `(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})`,
 		"youtube-live":  `(?:https?:\/\/)?(?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)([^\/\n\s]+)`,
+	}
+
+	for videoType, regex := range regexes {
+		re := regexp.MustCompile(regex)
+		match := re.FindStringSubmatch(url)
+		if len(match) > 1 {
+			return match[1], videoType
+		}
+	}
+	return "", ""
+}
+
+func extractTwitchInfo(url string) (string, string) {
+	regexes := map[string]string{
 		"twitch-video":  `(?:https?:\/\/)?(?:www\.)?twitch\.tv\/videos\/(\d+)`,
 		"twitch-stream": `(?:https?:\/\/)?(?:www\.)?twitch\.tv\/([a-zA-Z0-9_]+)`,
-		"kick-video":    `(?:https?:\/\/)?(?:www\.)?kick\.com\/([^\/]+)\/videos\/([a-zA-Z0-9-]+)`,
-		"kick-stream":   `(?:https?:\/\/)?(?:www\.)?kick\.com\/([a-zA-Z0-9_]+)`,
+		"twitch-clip":   `(?:https?:\/\/)?(?:www\.)?(?:twitch\.tv\/\w+\/clip\/|clips\.twitch\.tv\/)([A-Za-z0-9_-]+)`,
+	}
+
+	for videoType, regex := range regexes {
+		re := regexp.MustCompile(regex)
+		match := re.FindStringSubmatch(url)
+		if len(match) > 1 {
+			return match[1], videoType
+		}
+	}
+	return "", ""
+}
+
+func extractKickInfo(url string) (string, string) {
+	regexes := map[string]string{
+		"kick-video":  `(?:https?:\/\/)?(?:www\.)?kick\.com\/([^\/]+)\/videos\/([a-zA-Z0-9-]+)`,
+		"kick-stream": `(?:https?:\/\/)?(?:www\.)?kick\.com\/([a-zA-Z0-9_]+)`,
 	}
 
 	for videoType, regex := range regexes {
@@ -34,20 +75,13 @@ func ExtractVideoInfo(url string) (string, string) {
 			switch videoType {
 			case "kick-video":
 				if len(match) > 2 {
-					return "videos/" + match[2], videoType // Return "video/" + video ID
+					return "videos/" + match[2], videoType
 				}
 			case "kick-stream":
-				return match[1], videoType // Return just the username for streams
-			case "twitch-stream":
-				if !strings.Contains(url, "/videos/") {
-					return match[1], videoType // Return username for Twitch streams
-				}
-			default:
 				return match[1], videoType
 			}
 		}
 	}
-
 	return "", ""
 }
 

@@ -49,9 +49,9 @@ function debounce(func, wait) {
   };
 }
 
-// Add this function
-function extractVideoId(url) {
-  const videoInfo = extractVideoInfo(url);
+// Modified this function to be async
+async function extractVideoId(url) {
+  const videoInfo = await extractVideoInfo(url);
   return videoInfo.videoId;
 }
 
