@@ -10,20 +10,19 @@ async function storeVideoStates() {
   const promises = [];
 
   for (const box of iframeBoxes) {
-    const iframe = box.querySelector('iframe');
-    if (iframe) {
-      const videoType = box.querySelector('.video-container').className.split(' ')[1];
+    const videoContainer = box.querySelector('.video-container');
+    if (videoContainer) {
+      const videoType = videoContainer.className.split(' ')[1];
       videoStates[box.id] = {
-        src: iframe.src,
         type: videoType
       };
 
       if (videoType.includes('youtube')) {
-        storeYouTubeState(box.id, iframe);
+        promises.push(storeYouTubeState(box.id));
       } else if (videoType.includes('twitch')) {
-        promises.push(storeTwitchState(box.id, iframe));
+        promises.push(storeTwitchState(box.id));
       } else if (videoType.includes('kick')) {
-        storeKickState(box.id, iframe);
+        promises.push(storeKickState(box.id));
       }
     }
   }
@@ -32,58 +31,75 @@ async function storeVideoStates() {
   console.log('All video states stored:', videoStates);
 }
 
-function storeYouTubeState(boxId, iframe) {
-  if (window.YT && window.YT.Player) {
-    const player = YT.get(iframe.id);
-    if (player && player.getCurrentTime) {
-      videoStates[boxId].currentTime = player.getCurrentTime();
-      videoStates[boxId].volume = player.getVolume();
-      videoStates[boxId].muted = player.isMuted();
+function storeYouTubeState(boxId) {
+  return new Promise((resolve) => {
+    if (window.YT && window.YT.Player) {
+      const player = YT.get(`iframe-${boxId}`);
+      if (player && player.getCurrentTime) {
+        videoStates[boxId].currentTime = player.getCurrentTime();
+        videoStates[boxId].volume = player.getVolume();
+        videoStates[boxId].muted = player.isMuted();
+      }
     }
-  }
+    resolve();
+  });
 }
 
-async function storeTwitchState(boxId, iframe) {
-  if (videoStates[boxId] && videoStates[boxId].twitchPlayer) {
-    const player = videoStates[boxId].twitchPlayer;
-    const videoType = videoStates[boxId].type;
-    videoStates[boxId].videoId = videoStates[boxId].videoId || iframe.src.split('?')[0].split('/').pop();
-    if (videoType === 'twitch-clip') {
-      videoStates[boxId].clipId = iframe.src.match(/clip=([^&]+)/)[1];
-    } else {
-      try {
-        // Ensure the player is ready
-        if (!player.isPaused()) {
-          const currentTime = await player.getCurrentTime();
-          const volume = player.getVolume();
-          const quality = player.getQuality();
-          const playbackStats = player.getPlaybackStats();
+async function storeTwitchState(boxId) {
+  return new Promise((resolve) => {
+    if (videoStates[boxId] && videoStates[boxId].twitchPlayer) {
+      const player = videoStates[boxId].twitchPlayer;
+      const videoType = videoStates[boxId].type;
+      if (videoType === 'twitch-clip') {
+        videoStates[boxId] = {
+          ...videoStates[boxId],
+          clipId: videoStates[boxId].videoId
+        };
+      } else {
+        try {
+          const [currentTime, volume, quality, playbackStats] = Promise.all([
+            player.getCurrentTime(),
+            player.getVolume(),
+            player.getQuality(),
+            player.getPlaybackStats()
+          ]);
 
           videoStates[boxId] = {
             ...videoStates[boxId],
             currentTime,
             volume,
             quality,
+            muted: player.getMuted(),
             playbackStats
           };
 
+          // Add this line to ensure videoId is stored
+          if (videoType === 'twitch-video') {
+            videoStates[boxId].videoId = player.getVideo();
+          } else if (videoType === 'twitch-stream') {
+            videoStates[boxId].videoId = player.getChannel();
+          }
+
           console.log(`Stored Twitch state for ${boxId}:`, videoStates[boxId]);
-        } else {
-          console.log(`Twitch player for ${boxId} is paused, skipping state storage`);
+        } catch (error) {
+          console.error('Error storing Twitch state:', error);
         }
-      } catch (error) {
-        console.error('Error storing Twitch state:', error);
       }
+    } else {
+      console.warn(`Unable to store Twitch state for ${boxId}: Player not initialized`);
     }
-  } else {
-    console.warn(`Unable to store Twitch state for ${boxId}: Player not initialized`);
-  }
+    resolve();
+  });
 }
 
-function storeKickState(boxId, iframe) {
-  // Kick doesn't provide an API for getting current time
-  // We'll just store the URL for now
-  videoStates[boxId].src = iframe.src;
+function storeKickState(boxId) {
+  return new Promise((resolve) => {
+    const iframe = document.querySelector(`#${boxId} iframe`);
+    if (iframe) {
+      videoStates[boxId].src = iframe.src;
+    }
+    resolve();
+  });
 }
 
 function restoreVideoStates() {
@@ -91,26 +107,42 @@ function restoreVideoStates() {
   iframeBoxes.forEach(box => {
     if (videoStates[box.id]) {
       const state = videoStates[box.id];
+      let playerHtml;
+
+      if (state.type.includes('youtube')) {
+        playerHtml = `<iframe id="iframe-${box.id}" src="${state.src}" frameborder="0" allowfullscreen></iframe>`;
+      } else if (state.type.includes('twitch')) {
+        if (state.type === 'twitch-clip') {
+          playerHtml = `<iframe id="iframe-${box.id}" src="${state.src}" frameborder="0" allowfullscreen></iframe>`;
+        } else {
+          playerHtml = `<div id="player-${box.id}"></div>`;
+        }
+      } else if (state.type.includes('kick')) {
+        playerHtml = `<iframe id="iframe-${box.id}" src="${state.src}" frameborder="0" allowfullscreen></iframe>`;
+      }
+
       // Rebuild the box with the saved video
       box.innerHTML = `
         <div class="video-container ${state.type}">
-          <iframe id="iframe-${box.id}" src="${state.src}" frameborder="0" allowfullscreen></iframe>
+          ${playerHtml}
         </div>
         <div class="button-container">
           <button class="drag-button" onmousedown="event.preventDefault()">☰</button>
           <button class="reset-button">X</button>
         </div>
       `;
-      const iframe = box.querySelector('iframe');
-      iframe.onload = () => {
-        if (state.type.includes('youtube')) {
-          restoreYouTubeState(box.id, state);
-        } else if (state.type.includes('twitch')) {
-          restoreTwitchState(box.id, state);
-        } else if (state.type.includes('kick')) {
-          restoreKickState(box.id, state);
-        }
-      };
+
+      // Initialize the player
+      initializePlayer(box.id, state.videoId, state.type);
+
+      // Restore the state after the player is initialized
+      if (state.type.includes('youtube')) {
+        restoreYouTubeState(box.id, state);
+      } else if (state.type.includes('twitch')) {
+        restoreTwitchState(box.id, state);
+      } else if (state.type.includes('kick')) {
+        restoreKickState(box.id, state);
+      }
     }
   });
 }
@@ -132,49 +164,55 @@ function restoreYouTubeState(boxId, state) {
 }
 
 function restoreTwitchState(boxId, state) {
+  if (state.type === 'twitch-clip') {
+    const iframe = document.getElementById(`iframe-${boxId}`);
+    iframe.src = `https://clips.twitch.tv/embed?clip=${state.videoId}&parent=${window.location.hostname}`;
+    return;
+  }
+
   const options = {
     width: '100%',
     height: '100%',
     parent: [window.location.hostname],
     autoplay: true,
-    muted: false
+    muted: state.muted || false
   };
 
   if (state.type === 'twitch-stream') {
     options.channel = state.videoId;
   } else if (state.type === 'twitch-video') {
     options.video = state.videoId;
-  } else if (state.type === 'twitch-clip') {
-    // Clips use a different embed URL
-    const iframe = document.getElementById(`iframe-${boxId}`);
-    iframe.src = `https://clips.twitch.tv/embed?clip=${state.videoId}&parent=${window.location.hostname}`;
-    return; // Exit early as we don't need to create a Twitch.Player for clips
-  }
-
-  if (!options.channel && !options.video) {
-    console.error('Missing channel or video ID for Twitch player', state);
-    return;
   }
 
   try {
-    const player = new Twitch.Player(`iframe-${boxId}`, options);
+    const player = new Twitch.Player(`player-${boxId}`, options);
     
     player.addEventListener(Twitch.Player.READY, () => {
       console.log('Twitch player is ready');
       videoStates[boxId] = videoStates[boxId] || {};
       videoStates[boxId].twitchPlayer = player;
       
-      if (state.type !== 'twitch-clip') {
-        player.setVolume(state.volume || 0.5);
-        if (state.quality) {
-          player.setQuality(state.quality);
-        }
-        if (state.type === 'twitch-video' && state.currentTime) {
-          player.seek(state.currentTime);
-        }
+      player.setVolume(state.volume || 0.5);
+      if (state.quality) {
+        player.setQuality(state.quality);
       }
+      if (state.type === 'twitch-video' && state.currentTime) {
+        player.seek(state.currentTime);
+      }
+      player.setMuted(state.muted || false);
+
       console.log(`Restored Twitch state for ${boxId}:`, state);
     });
+
+    // Add more event listeners as needed
+    player.addEventListener(Twitch.Player.PLAY, () => {
+      console.log(`Twitch player for ${boxId} started playing`);
+    });
+
+    player.addEventListener(Twitch.Player.PAUSE, () => {
+      console.log(`Twitch player for ${boxId} paused`);
+    });
+
   } catch (error) {
     console.error('Error restoring Twitch state:', error);
   }
@@ -213,21 +251,28 @@ async function addChannel(boxId, url) {
     const { videoId, videoType } = await extractVideoInfo(url);
     console.log(`Alright, we got a video ID: ${videoId} and type: ${videoType}`);
 
-    let embedSrc, videoClass;
+    let embedSrc, videoClass, playerHtml;
 
     if (videoType.includes('youtube')) {
       ({ embedSrc, videoClass } = addYouTubeChannel(videoId, videoType));
+      playerHtml = `<iframe id="iframe-${boxId}" src="${embedSrc}" frameborder="0" allowfullscreen scrolling="no"></iframe>`;
     } else if (videoType.includes('twitch')) {
       ({ embedSrc, videoClass } = addTwitchChannel(videoId, videoType));
+      if (videoType === 'twitch-clip') {
+        playerHtml = `<iframe id="iframe-${boxId}" src="${embedSrc}" frameborder="0" allowfullscreen scrolling="no"></iframe>`;
+      } else {
+        playerHtml = `<div id="player-${boxId}"></div>`;
+      }
     } else if (videoType.includes('kick')) {
       ({ embedSrc, videoClass } = addKickChannel(videoId, videoType));
+      playerHtml = `<iframe id="iframe-${boxId}" src="${embedSrc}" frameborder="0" allowfullscreen scrolling="no"></iframe>`;
     } else {
       throw new Error(`Unsupported video type: ${videoType}`);
     }
 
     box.innerHTML = `
       <div class="video-container ${videoClass}">
-        <iframe id="iframe-${boxId}" src="${embedSrc}" frameborder="0" allowfullscreen scrolling="no"></iframe>
+        ${playerHtml}
       </div>
       <div class="button-container">
         <button class="drag-button" onmousedown="event.preventDefault()">☰</button>
@@ -235,6 +280,7 @@ async function addChannel(boxId, url) {
       </div>
     `;
     videoStates[boxId] = {
+      ...videoStates[boxId],
       src: embedSrc,
       currentTime: 0,
       type: videoType,
@@ -273,10 +319,8 @@ function addTwitchChannel(videoId, videoType) {
   const parentDomain = window.location.hostname;
   
   if (videoType === 'twitch-video') {
-    embedSrc = `https://player.twitch.tv/?video=${videoId}&parent=${parentDomain}&autoplay=true&muted=false`;
     videoClass = 'twitch-video';
   } else if (videoType === 'twitch-stream') {
-    embedSrc = `https://player.twitch.tv/?channel=${videoId}&parent=${parentDomain}&autoplay=true&muted=false`;
     videoClass = 'twitch-stream';
   } else if (videoType === 'twitch-clip') {
     embedSrc = `https://clips.twitch.tv/embed?clip=${videoId}&parent=${parentDomain}&autoplay=false&muted=false`;
@@ -321,77 +365,61 @@ function initializeYouTubePlayer(boxId) {
 
 function initializeTwitchPlayer(boxId, videoId, videoType) {
   if (videoType === 'twitch-clip') {
-    // Clips don't support the interactive player, so we don't need to initialize anything
     return;
   }
 
   const options = {
     width: '100%',
     height: '100%',
-    [videoType === 'twitch-stream' ? 'channel' : 'video']: videoId,
     parent: [window.location.hostname],
     autoplay: true,
     muted: false
   };
-  
+
+  if (videoType === 'twitch-stream') {
+    options.channel = videoId;
+  } else if (videoType === 'twitch-video') {
+    options.video = videoId;
+  }
+
   try {
-    const player = new Twitch.Player(`iframe-${boxId}`, options);
+    const player = new Twitch.Player(`player-${boxId}`, options);
     
     player.addEventListener(Twitch.Player.READY, () => {
-      console.log('Twitch player is ready');
-      videoStates[boxId] = videoStates[boxId] || {};
-      videoStates[boxId].twitchPlayer = player;
+      console.log(`Twitch player for ${boxId} is ready`);
+      videoStates[boxId] = {
+        ...videoStates[boxId],
+        twitchPlayer: player
+      };
       
       // Set initial volume
       player.setVolume(0.5);
     });
 
-    player.addEventListener(Twitch.Player.CAPTIONS, (captions) => {
-      console.log(`Captions for ${boxId}:`, captions);
-      // You can handle captions here if needed
-    });
-
-    player.addEventListener(Twitch.Player.ENDED, () => {
-      console.log(`Video in ${boxId} has ended`);
-      // You can handle video end here, e.g., show a replay button
+    player.addEventListener(Twitch.Player.PLAY, () => {
+      console.log(`Video in ${boxId} started playing`);
     });
 
     player.addEventListener(Twitch.Player.PAUSE, () => {
       console.log(`Video in ${boxId} is paused`);
-      videoStates[boxId].isPaused = true;
     });
 
-    player.addEventListener(Twitch.Player.PLAY, () => {
-      console.log(`Video in ${boxId} is about to play`);
-    });
-
-    player.addEventListener(Twitch.Player.PLAYBACK_BLOCKED, () => {
-      console.log(`Playback blocked for ${boxId}`);
-      // You might want to show a message to the user here
-    });
-
-    player.addEventListener(Twitch.Player.PLAYING, () => {
-      console.log(`Video in ${boxId} is playing`);
-      videoStates[boxId].isPaused = false;
+    player.addEventListener(Twitch.Player.ENDED, () => {
+      console.log(`Video in ${boxId} has ended`);
     });
 
     player.addEventListener(Twitch.Player.OFFLINE, () => {
-      console.log(`Channel in ${boxId} went offline`);
-      // You might want to update the UI to show the channel is offline
+      console.log(`Channel in ${boxId} is offline`);
     });
 
     player.addEventListener(Twitch.Player.ONLINE, () => {
-      console.log(`Channel in ${boxId} came online`);
-      // You might want to update the UI to show the channel is online
+      console.log(`Channel in ${boxId} is online`);
     });
 
-    player.addEventListener(Twitch.Player.SEEK, () => {
-      console.log(`Seek occurred in ${boxId}`);
-      // You might want to update some UI element showing the current time
-    });
+    // Add more event listeners as needed
 
   } catch (error) {
-    console.error('Error initializing Twitch player:', error);
+    console.error(`Error initializing Twitch player for ${boxId}:`, error);
   }
 }
 
