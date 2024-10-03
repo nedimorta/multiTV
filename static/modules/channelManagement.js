@@ -46,40 +46,50 @@ function storeYouTubeState(boxId) {
 }
 
 async function storeTwitchState(boxId) {
-  if (videoStates[boxId] && videoStates[boxId].twitchPlayer) {
-    const player = videoStates[boxId].twitchPlayer;
-    const videoType = videoStates[boxId].type;
-    if (videoType === 'twitch-clip') {
-      videoStates[boxId] = {
-        ...videoStates[boxId],
-        clipId: videoStates[boxId].videoId
-      };
-    } else {
-      try {
-        const [currentTime, volume, quality, playbackStats] = await Promise.all([
-          player.getCurrentTime(),
-          player.getVolume(),
-          player.getQuality(),
-          player.getPlaybackStats()
-        ]);
-
+  return new Promise((resolve) => {
+    if (videoStates[boxId] && videoStates[boxId].twitchPlayer) {
+      const player = videoStates[boxId].twitchPlayer;
+      const videoType = videoStates[boxId].type;
+      if (videoType === 'twitch-clip') {
         videoStates[boxId] = {
           ...videoStates[boxId],
-          currentTime,
-          volume,
-          quality,
-          muted: player.getMuted(),
-          playbackStats
+          clipId: videoStates[boxId].videoId
         };
+      } else {
+        try {
+          const [currentTime, volume, quality, playbackStats] = Promise.all([
+            player.getCurrentTime(),
+            player.getVolume(),
+            player.getQuality(),
+            player.getPlaybackStats()
+          ]);
 
-        console.log(`Stored Twitch state for ${boxId}:`, videoStates[boxId]);
-      } catch (error) {
-        console.error('Error storing Twitch state:', error);
+          videoStates[boxId] = {
+            ...videoStates[boxId],
+            currentTime,
+            volume,
+            quality,
+            muted: player.getMuted(),
+            playbackStats
+          };
+
+          // Add this line to ensure videoId is stored
+          if (videoType === 'twitch-video') {
+            videoStates[boxId].videoId = player.getVideo();
+          } else if (videoType === 'twitch-stream') {
+            videoStates[boxId].videoId = player.getChannel();
+          }
+
+          console.log(`Stored Twitch state for ${boxId}:`, videoStates[boxId]);
+        } catch (error) {
+          console.error('Error storing Twitch state:', error);
+        }
       }
+    } else {
+      console.warn(`Unable to store Twitch state for ${boxId}: Player not initialized`);
     }
-  } else {
-    console.warn(`Unable to store Twitch state for ${boxId}: Player not initialized`);
-  }
+    resolve();
+  });
 }
 
 function storeKickState(boxId) {
